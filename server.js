@@ -9,9 +9,6 @@ mongoose
 	.then(() => console.log('Successfully connected to the database!'))
 	.catch(() => console.log('Connection to database failed'));
 
-// just for testing purposes
-require('./models/tourModel');
-
 const port = process.env.PORT || 8080;
 app.listen(port, () => {
 	console.log(`Server is listening on port ${port}`);

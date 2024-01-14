@@ -17,16 +17,4 @@ const tourSchema = new mongoose.Schema({
 });
 
 const Tour = mongoose.model('Tour', tourSchema);
-
-const testTour = new Tour({
-	name: 'Test tour',
-	price: 1000,
-});
-
-testTour
-	.save()
-	.then(() => console.log('Tour saved!'))
-	.catch(err => {
-		console.log('Tour could not be saved');
-		console.log(err);
-	});
+module.exports = Tour;
