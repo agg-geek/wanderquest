@@ -48,7 +48,7 @@ module.exports.createTour = (req, res) => {
 	const newTour = Object.assign({ id: tourId }, req.body);
 	tours.push(newTour);
 
-	fs.writeFile(`${__dirname}/dev-files/data/tours-simple.json`, JSON.stringify(tours), err => {
+	fs.writeFile(`${__dirname}/../dev-files/data/tours-simple.json`, JSON.stringify(tours), err => {
 		res.status(201).json({
 			status: 'success',
 			data: { newTour },
