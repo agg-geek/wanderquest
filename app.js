@@ -1,6 +1,7 @@
 const fs = require('fs');
 const express = require('express');
 const morgan = require('morgan');
+const exp = require('constants');
 
 const app = express();
 
@@ -12,6 +13,8 @@ app.use((req, res, next) => {
 	req.requestTime = new Date().toISOString();
 	next();
 });
+
+// =====================================================================
 
 const tours = JSON.parse(fs.readFileSync(`${__dirname}/dev-files/data/tours-simple.json`));
 
@@ -86,6 +89,8 @@ const deleteTour = (req, res) => {
 	});
 };
 
+// =====================================================================
+
 const getAllUsers = (req, res, next) => {
 	res.status(500).json({
 		// notice 500: internal server error
@@ -122,31 +127,44 @@ const deleteUser = (req, res, next) => {
 	});
 };
 
+// =====================================================================
+
+const tourRouter = express.Router();
 // prettier-ignore
-app
-    .route('/api/v1/tours')
+tourRouter
+    .route('/') // notice '/' route
     .get(getAllTours)
     .post(createTour);
 
 // prettier-ignore
-app
-    .route('/api/v1/tours/:id')
+tourRouter
+    .route('/:id') // notice '/:id' route
     .get(getTour)
     .patch(updateTour)
     .delete(deleteTour);
 
+app.use('/api/v1/tours', tourRouter);
+
+// =====================================================================
+
+const userRouter = express.Router();
+
 // prettier-ignore
-app
-    .route('/api/v1/users')
+userRouter
+    .route('/')
     .get(getAllUsers)
     .post(createUser);
 
 // prettier-ignore
-app
-    .route('/api/v1/users/:id')
+userRouter
+    .route('/:id')
     .get(getUser)
     .patch(updateUser)
     .delete(deleteUser);
+
+app.use('/api/v1/users', userRouter);
+
+// =====================================================================
 
 const port = 3000;
 app.listen(port, () => {
