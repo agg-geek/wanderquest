@@ -3,17 +3,11 @@ const express = require('express');
 
 const app = express();
 
-// the data from post is not directly added to req obj by express
-// we need to use express.json() (a middleware) to do that
-// without this, req.body will be undefined for a post requeest (checked!)
 app.use(express.json());
 
-// notice JSON.parse and readFileSync (sync, but at the top level)
 const tours = JSON.parse(fs.readFileSync(`${__dirname}/dev-files/data/tours-simple.json`));
 
-// the callback fn is known as route handler
 app.get('/api/v1/tours', (req, res) => {
-	// using JSend specification for JSON response
 	res.status(200).json({
 		status: 'success',
 		results: tours.length,
@@ -21,18 +15,37 @@ app.get('/api/v1/tours', (req, res) => {
 	});
 });
 
-// send the post request with body in raw/json format
-app.post('/api/v1/tours', (req, res) => {
-	// console.log(req.body);
+// '/api/v1/tours/:id/:x/:y' need to specify id, x, y
+// if you didn't specify y, then error (as the exact URL is not matched)
+// to keep y optional, use /tours/:id/:x/:y?
+// for which req.params gives { id: '4', x: '20', y: undefined }
+app.get('/api/v1/tours/:id', (req, res) => {
+	// console.log(req.params);
 
+	// req.params.id is a string, but tour.id is Number
+	const tourId = Number(req.params.id);
+	const tour = tours.find(tour => tour.id === tourId);
+
+	if (!tour) {
+		return res.status(404).json({
+			status: 'fail',
+			message: 'Invalid ID',
+		});
+	}
+
+	res.status(200).json({
+		status: 'success',
+		data: { tour },
+	});
+});
+
+app.post('/api/v1/tours', (req, res) => {
 	const tourId = tours.at(-1).id + 1;
-	const newTour = Object.assign({ id: tourId }, req.body); // req.body.id = tourId mutates req.body
+	const newTour = Object.assign({ id: tourId }, req.body);
 	tours.push(newTour);
 
-	// notice JSON.stringify(tours)
 	fs.writeFile(`${__dirname}/dev-files/data/tours-simple.json`, JSON.stringify(tours), err => {
 		res.status(201).json({
-			// status 201 means created
 			status: 'success',
 			data: { newTour },
 		});
