@@ -1,24 +1,21 @@
 const fs = require('fs');
 const express = require('express');
+const morgan = require('morgan');
 
 const app = express();
 
+// using 3rd party middleware
+app.use(morgan('dev'));
 app.use(express.json());
 
 app.use((req, res, next) => {
-	console.log('Hello from the middleware!');
-	next(); // important
-});
-
-app.use((req, res, next) => {
 	req.requestTime = new Date().toISOString();
-	next(); // important
+	next();
 });
 
 const tours = JSON.parse(fs.readFileSync(`${__dirname}/dev-files/data/tours-simple.json`));
 
 const getAllTours = (req, res) => {
-	console.log(req.requestTime);
 	res.status(200).json({
 		status: 'success',
 		requestedAt: req.requestTime,
@@ -83,10 +80,9 @@ const deleteTour = (req, res) => {
 		});
 	}
 
-	// notice 204 response
 	res.status(204).json({
 		status: 'success',
-		data: null, // notice!
+		data: null,
 	});
 };
 
