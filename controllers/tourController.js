@@ -12,8 +12,6 @@ module.exports.validateId = (req, res, next, val) => {
 	next();
 };
 
-// validateTour when creating a new tour through POST
-// the tour should have name and price
 module.exports.validateTour = (req, res, next) => {
 	if (!req.body.name || !req.body.price) {
 		return res.status(400).json({
