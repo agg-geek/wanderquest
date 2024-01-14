@@ -1,44 +1,53 @@
 const Tour = require('./../models/tourModel');
 
-module.exports.getAllTours = (req, res) => {
-	res.status(200).json({
-		status: 'success',
-		requestedAt: req.requestTime,
-		// results: tours.length,
-		// data: { tours },
-	});
+module.exports.getAllTours = async (req, res) => {
+	try {
+		const tours = await Tour.find();
+
+		res.status(200).json({
+			status: 'success',
+			results: tours.length,
+			data: { tours },
+		});
+	} catch (err) {
+		res.status(404).json({
+			status: 'fail',
+			message: err,
+		});
+	}
 };
 
-module.exports.getTour = (req, res) => {
-	const tourId = Number(req.params.id);
-	// const tour = tours.find(tour => tour.id === tourId);
+module.exports.getTour = async (req, res) => {
+	try {
+		// notice using findOne
+		// using .find() will find all tours matching search criteria
+		// and will return it as an array
+		// also notice using _id
+		// const tour = await Tour.findOne({ _id: req.params.id });
 
-	res.status(200).json({
-		status: 'success',
-		// data: { tour },
-	});
+		// notice findById
+		const tour = await Tour.findById(req.params.id);
+
+		res.status(200).json({
+			status: 'success',
+			data: { tour },
+		});
+	} catch (err) {
+		res.status(404).json({
+			status: 'fail',
+			message: 'Tour not found',
+		});
+	}
 };
 
 module.exports.createTour = async (req, res) => {
-	// the difference between this method and using create is that
-	// .save() exists on the instance of Tour
-	// .create() exists on the Tour itself
-	// const newTour = new Tour({});
-	// newTour.save();
-
-	console.log(req.body);
-
 	try {
-		// using .create will actually create and store the tour in db,
-		// just like .save() did
 		const newTour = await Tour.create(req.body);
 		res.status(201).json({
 			status: 'success',
 			data: { tour: newTour },
 		});
 	} catch (err) {
-		// errors like mongoose validation errors will be caught here
-		// console.log(err);
 		res.status(400).json({
 			status: 'fail',
 			message: err,
