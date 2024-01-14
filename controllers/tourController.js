@@ -2,13 +2,23 @@ const fs = require('fs');
 
 const tours = JSON.parse(fs.readFileSync(`${__dirname}/../dev-files/data/tours-simple.json`));
 
-// we separate the validation logic into its own fn
-// the actual update/delete etc controller do not worry about validation
 module.exports.validateId = (req, res, next, val) => {
 	if (Number(req.params.id) > tours.length) {
 		return res.status(404).json({
 			status: 'fail',
 			message: 'Invalid ID',
+		});
+	}
+	next();
+};
+
+// validateTour when creating a new tour through POST
+// the tour should have name and price
+module.exports.validateTour = (req, res, next) => {
+	if (!req.body.name || !req.body.price) {
+		return res.status(400).json({
+			status: 'fail',
+			message: 'Missing tour name or price',
 		});
 	}
 	next();
