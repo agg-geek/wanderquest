@@ -2,10 +2,17 @@ const fs = require('fs');
 
 const tours = JSON.parse(fs.readFileSync(`${__dirname}/../dev-files/data/tours-simple.json`));
 
-// console.log(__dirname); // returns path till /controllers
-// hence notice the use of '{__dirname}/../' since
-// dirname rerfers to controllers folder
-// and not the root folder in which app.js is present
+// we separate the validation logic into its own fn
+// the actual update/delete etc controller do not worry about validation
+module.exports.validateId = (req, res, next, val) => {
+	if (Number(req.params.id) > tours.length) {
+		return res.status(404).json({
+			status: 'fail',
+			message: 'Invalid ID',
+		});
+	}
+	next();
+};
 
 module.exports.getAllTours = (req, res) => {
 	res.status(200).json({
@@ -19,13 +26,6 @@ module.exports.getAllTours = (req, res) => {
 module.exports.getTour = (req, res) => {
 	const tourId = Number(req.params.id);
 	const tour = tours.find(tour => tour.id === tourId);
-
-	if (!tour) {
-		return res.status(404).json({
-			status: 'fail',
-			message: 'Invalid ID',
-		});
-	}
 
 	res.status(200).json({
 		status: 'success',
@@ -47,14 +47,6 @@ module.exports.createTour = (req, res) => {
 };
 
 module.exports.updateTour = (req, res) => {
-	const tourId = Number(req.params.id);
-	if (tourId > tours.length) {
-		return res.status(404).json({
-			status: 'fail',
-			message: 'Invalid ID',
-		});
-	}
-
 	res.status(200).json({
 		status: 'success',
 		data: {
@@ -64,14 +56,6 @@ module.exports.updateTour = (req, res) => {
 };
 
 module.exports.deleteTour = (req, res) => {
-	const tourId = Number(req.params.id);
-	if (tourId > tours.length) {
-		return res.status(404).json({
-			status: 'fail',
-			message: 'Invalid ID',
-		});
-	}
-
 	res.status(204).json({
 		status: 'success',
 		data: null,
