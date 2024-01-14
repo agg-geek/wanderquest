@@ -86,6 +86,42 @@ const deleteTour = (req, res) => {
 	});
 };
 
+const getAllUsers = (req, res, next) => {
+	res.status(500).json({
+		// notice 500: internal server error
+		status: 'error',
+		message: 'This route is not yet defined',
+	});
+};
+const getUser = (req, res, next) => {
+	res.status(500).json({
+		// notice 500: internal server error
+		status: 'error',
+		message: 'This route is not yet defined',
+	});
+};
+const createUser = (req, res, next) => {
+	res.status(500).json({
+		// notice 500: internal server error
+		status: 'error',
+		message: 'This route is not yet defined',
+	});
+};
+const updateUser = (req, res, next) => {
+	res.status(500).json({
+		// notice 500: internal server error
+		status: 'error',
+		message: 'This route is not yet defined',
+	});
+};
+const deleteUser = (req, res, next) => {
+	res.status(500).json({
+		// notice 500: internal server error
+		status: 'error',
+		message: 'This route is not yet defined',
+	});
+};
+
 // prettier-ignore
 app
     .route('/api/v1/tours')
@@ -98,6 +134,19 @@ app
     .get(getTour)
     .patch(updateTour)
     .delete(deleteTour);
+
+// prettier-ignore
+app
+    .route('/api/v1/users')
+    .get(getAllUsers)
+    .post(createUser);
+
+// prettier-ignore
+app
+    .route('/api/v1/users/:id')
+    .get(getUser)
+    .patch(updateUser)
+    .delete(deleteUser);
 
 const port = 3000;
 app.listen(port, () => {
