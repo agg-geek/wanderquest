@@ -44,7 +44,7 @@ module.exports.getAllTours = async (req, res) => {
 		}
 
 		// 2. Execute query
-		const tours = await Tour.find(query);
+		const tours = await query;
 
 		// 3. Send response
 		res.status(200).json({
