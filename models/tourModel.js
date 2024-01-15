@@ -75,16 +75,21 @@ tourSchema.pre('save', function (next) {
 	next();
 });
 
-// when you used the pre-find hook to get the secret tour using getTour
-// you will actually get it, because
-// the pre-find hook only works for .findOne()
-// and we used .findById (equivalent to .findOne) in getAllTours
-// we need to define it separately for .findOne (in getTour) like:
-// tourSchema.pre('findOne', function (next) {
-
-// our we can define all together like:
+// we define this.start for post hook
+// even though this refers to a query obj, it is still a normal obj
+// and we can define our own custom properties on it (like start here)
 tourSchema.pre(/^find/, function (next) {
 	this.find({ secretTour: { $ne: true } });
+	this.start = Date.now(); // current time in milliseconds
+	next();
+});
+
+// post-find hook gets access to all documents actually found after query
+tourSchema.post(/^find/, function (docs, next) {
+	// console.log(docs);
+	// we just defined a start property on the query before searching it
+	// we then log here the time taken to execute the query
+	console.log(`Query took ${Date.now() - this.start} milliseconds!`);
 	next();
 });
 
