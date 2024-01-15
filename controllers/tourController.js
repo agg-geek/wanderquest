@@ -10,46 +10,37 @@ module.exports.getAllTours = async (req, res) => {
 		excludedFields.forEach(field => delete queryObj[field]);
 
 		//    b. Advanced filtering
-		//       implement using operators gte, gt, lte, lt in query string
-		//       the query string looks like ?difficulty=easy&price[lte]=1000
-		//       console.log(req.query); gives:
-		//       { difficulty: 'easy', price: { lte: '1000' } }
-		//       hence replace lte etc stuff with $lte
-
 		let queryStr = JSON.stringify(queryObj);
 		queryStr = queryStr.replace(/\b(gte|gt|lte|lt)\b/g, match => `$${match}`);
 
 		let query = Tour.find(JSON.parse(queryStr));
 
 		//    c. Implement sorting
-		//       ?sort=price to sort by price
-		//       ?sort=-price to sort by price in descending order
-		//       ?sort=price,ratingsAvg to sort by price, if price is same, sort by ratingsAvg
-		//       req.query looks like { sort: 'price,ratingsAvg' }
-		//       mongoose query should look like .sort('price ratingsAvg')
-
 		if (req.query.sort) {
 			const sortBy = req.query.sort.split(',').join(' ');
 			query = query.sort(sortBy);
 		} else {
-			query = query.sort('-createdAt'); // sort by newest
+			query = query.sort('-createdAt');
 		}
 
 		//    d. Field limiting (projection)
-		//       return only the data requested by the client
-		//       specify ?fields=name,price to request only name and price of tours
-		//       mongoose works as .select('name price') to select name and price
-		//       specify ?fields=-price to request everything but price of tour
-		//       mongoose works as .select('-price') to not select price, but everything else
-
 		if (req.query.fields) {
 			const fields = req.query.fields.split(',').join(' ');
 			query = query.select(fields);
 		} else {
-			// mongo creates a __v to it to use internally
-			// but we don't need it so just omit it
 			query = query.select('-__v');
 		}
+
+		//    e. Pagination
+		//       specify page and limit to show only limit results per page
+		//       so for total of 1000 results and limit=10, there will be 100 pages
+		//       ?limit=10&page=2 gives 2nd page of 100 pages, ie results 11-20
+		//       mongoose works like skip(10).limit(10) to skip 10 results (since we want 11-20)
+		const page = +req.query.page || 1;
+		const limit = +req.query.limit || 10;
+		const skip = (page - 1) * limit;
+
+		query = query.skip(skip).limit(limit);
 
 		// 2. Execute query
 		const tours = await Tour.find(query);
