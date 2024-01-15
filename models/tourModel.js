@@ -1,5 +1,6 @@
 const mongoose = require('mongoose');
 const slugify = require('slugify');
+const validator = require('validator');
 
 const tourSchema = new mongoose.Schema(
 	{
@@ -10,6 +11,12 @@ const tourSchema = new mongoose.Schema(
 			trim: true,
 			minlength: [10, 'A tour name must have atleast 10 characters'],
 			maxlength: [40, 'A tour name must have atmost 40 characters'],
+			// validator is the library and isAlphanumeric is the method
+			// validate: validator.isAlphanumeric,
+			validate: {
+				validator: tourName => validator.isAlphanumeric(tourName, 'en-GB', { ignore: ' ' }),
+				message: 'Tour name must only contain characters',
+			},
 		},
 		slug: String,
 		price: {
@@ -19,13 +26,9 @@ const tourSchema = new mongoose.Schema(
 		priceDiscount: {
 			type: Number,
 			validate: {
-				// return true if validation is successful
 				validator: function (discount) {
-					// this only points to current doc on new document creation
-					// it does not work while updating document
 					return discount < this.price;
 				},
-				// {VALUE} refers to the discount, it is provided by mongoose
 				message: 'Discount price ({VALUE}) should be less than regular price',
 			},
 		},
