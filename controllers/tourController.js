@@ -1,6 +1,14 @@
 const { json } = require('express');
 const Tour = require('./../models/tourModel');
 
+// middleware to prefill parts of req so this filled req obj goes to getAllTours
+module.exports.topTours = (req, res, next) => {
+	req.query.limit = '5'; // notice string '5'
+	req.query.sort = '-ratingsAvg,price'; // notice no spaces and commas
+	req.query.fields = 'name,ratingsAvg,difficulty,summary,price';
+	next();
+};
+
 module.exports.getAllTours = async (req, res) => {
 	try {
 		// 1. Build query
