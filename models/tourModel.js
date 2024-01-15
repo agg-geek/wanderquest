@@ -75,21 +75,21 @@ tourSchema.pre('save', function (next) {
 	next();
 });
 
-// we define this.start for post hook
-// even though this refers to a query obj, it is still a normal obj
-// and we can define our own custom properties on it (like start here)
 tourSchema.pre(/^find/, function (next) {
 	this.find({ secretTour: { $ne: true } });
-	this.start = Date.now(); // current time in milliseconds
 	next();
 });
 
-// post-find hook gets access to all documents actually found after query
-tourSchema.post(/^find/, function (docs, next) {
-	// console.log(docs);
-	// we just defined a start property on the query before searching it
-	// we then log here the time taken to execute the query
-	console.log(`Query took ${Date.now() - this.start} milliseconds!`);
+// Aggregation middleware:
+// here, this keyword points to current aggregation obj
+// when /tour-stats is run, i don't get stats for secret tour
+// whereas i should have got it (jonas got it)
+// anyways, here this.pipeline() refers to the pipeline array that we passed
+// unshift is simply the array method to insert elem at the beginning of array
+
+tourSchema.pre('aggregate', function (next) {
+	// console.log(this.pipeline());
+	this.pipeline().unshift({ $match: { secretTour: { $ne: true } } });
 	next();
 });
 
