@@ -1,18 +1,25 @@
+const { json } = require('express');
 const Tour = require('./../models/tourModel');
 
 module.exports.getAllTours = async (req, res) => {
 	try {
-		// Tour.find() returns a mongoose query obj
-		// query obj has a Query.prototype which contains
-		// methods like .where(), .each() etc
-		// some more important things were mentioned, didn't understand
-
 		// 1. Build query
+		//    a. Basic filtering
 		const queryObj = { ...req.query };
 		const excludedFields = ['page', 'sort', 'limit', 'fields'];
 		excludedFields.forEach(field => delete queryObj[field]);
 
-		const query = Tour.find(queryObj);
+		//    b. Advanced filtering
+		//       implement using operators gte, gt, lte, lt in query string
+		//       the query string looks like ?difficulty=easy&price[lte]=1000
+		//       console.log(req.query); gives:
+		//       { difficulty: 'easy', price: { lte: '1000' } }
+		//       hence replace lte etc stuff with $lte
+
+		let queryStr = JSON.stringify(queryObj);
+		queryStr = queryStr.replace(/\b(gte|gt|lte|lt)\b/g, match => `$${match}`);
+
+		const query = Tour.find(JSON.parse(queryStr));
 
 		// 2. Execute query
 		const tours = await Tour.find(query);
