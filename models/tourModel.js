@@ -8,6 +8,8 @@ const tourSchema = new mongoose.Schema(
 			required: [true, 'A tour must have a name'],
 			unique: true,
 			trim: true,
+			minlength: [10, 'A tour name must have atleast 10 characters'],
+			maxlength: [40, 'A tour name must have atmost 40 characters'],
 		},
 		slug: String,
 		price: {
@@ -25,10 +27,17 @@ const tourSchema = new mongoose.Schema(
 		difficulty: {
 			type: String,
 			required: [true, 'A tour must have a difficulty'],
+			// enum: ['easy', 'medium', 'difficult'],
+			enum: {
+				values: ['easy', 'medium', 'difficult'],
+				message: 'Difficulty can be either easy, medium or difficult',
+			},
 		},
 		ratingsAvg: {
 			type: Number,
 			default: 4,
+			min: [1, 'Rating must be atleast 1'],
+			max: [5, 'Rating must be atmost 5'],
 		},
 		ratingsQuantity: {
 			type: Number,
@@ -80,15 +89,7 @@ tourSchema.pre(/^find/, function (next) {
 	next();
 });
 
-// Aggregation middleware:
-// here, this keyword points to current aggregation obj
-// when /tour-stats is run, i don't get stats for secret tour
-// whereas i should have got it (jonas got it)
-// anyways, here this.pipeline() refers to the pipeline array that we passed
-// unshift is simply the array method to insert elem at the beginning of array
-
 tourSchema.pre('aggregate', function (next) {
-	// console.log(this.pipeline());
 	this.pipeline().unshift({ $match: { secretTour: { $ne: true } } });
 	next();
 });
