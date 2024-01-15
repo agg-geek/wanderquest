@@ -16,20 +16,20 @@ const deleteTours = async () => {
 	try {
 		await Tour.deleteMany();
 		console.log('Tours successfully deleted');
-		process.exit();
 	} catch (err) {
 		console.log(err);
 	}
+	process.exit();
 };
 
 const importTours = async () => {
 	try {
 		await Tour.create(tours);
 		console.log('Tours successfully saved');
-		process.exit();
 	} catch (err) {
 		console.log(err);
 	}
+	process.exit();
 };
 
 // console.log(process.argv);
