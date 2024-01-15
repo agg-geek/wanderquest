@@ -75,20 +75,15 @@ tourSchema.pre('save', function (next) {
 	next();
 });
 
-// QUERY MIDDLEWARE
-// .find() returns a mongoose query obj and .find() is a query middleware,
-// so 'this' points to current query obj and not current document
-// we have defined secretTour property and such tours should never appear
-// in getAllTour results
+// when you used the pre-find hook to get the secret tour using getTour
+// you will actually get it, because
+// the pre-find hook only works for .findOne()
+// and we used .findById (equivalent to .findOne) in getAllTours
+// we need to define it separately for .findOne (in getTour) like:
+// tourSchema.pre('findOne', function (next) {
 
-// on every find, this fn will not send secret tours when you request all tours
-// the Tour.find() in getAllTours is the query and before you await that query
-// then this find middleware is run which chains another find to that query
-// this chained find then only queries for non-secret tour documents
-tourSchema.pre('find', function (next) {
-	// find query is effectively equal to secretTour: false
-	// but other tours may not even have this attribute,
-	// hence use this method
+// our we can define all together like:
+tourSchema.pre(/^find/, function (next) {
 	this.find({ secretTour: { $ne: true } });
 	next();
 });
