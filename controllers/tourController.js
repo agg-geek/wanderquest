@@ -19,7 +19,14 @@ module.exports.getAllTours = async (req, res) => {
 		let queryStr = JSON.stringify(queryObj);
 		queryStr = queryStr.replace(/\b(gte|gt|lte|lt)\b/g, match => `$${match}`);
 
-		const query = Tour.find(JSON.parse(queryStr));
+		let query = Tour.find(JSON.parse(queryStr));
+
+		//    c. Implement sorting
+		//       ?sort=price to sort by price
+		//       ?sort=-price to sort by price in descending order
+		if (req.query.sort) {
+			query = query.sort(req.query.sort);
+		}
 
 		// 2. Execute query
 		const tours = await Tour.find(query);
