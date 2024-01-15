@@ -35,6 +35,22 @@ module.exports.getAllTours = async (req, res) => {
 			query = query.sort('-createdAt'); // sort by newest
 		}
 
+		//    d. Field limiting (projection)
+		//       return only the data requested by the client
+		//       specify ?fields=name,price to request only name and price of tours
+		//       mongoose works as .select('name price') to select name and price
+		//       specify ?fields=-price to request everything but price of tour
+		//       mongoose works as .select('-price') to not select price, but everything else
+
+		if (req.query.fields) {
+			const fields = req.query.fields.split(',').join(' ');
+			query = query.select(fields);
+		} else {
+			// mongo creates a __v to it to use internally
+			// but we don't need it so just omit it
+			query = query.select('-__v');
+		}
+
 		// 2. Execute query
 		const tours = await Tour.find(query);
 
