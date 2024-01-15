@@ -2,15 +2,15 @@ const Tour = require('./../models/tourModel');
 
 module.exports.getAllTours = async (req, res) => {
 	try {
-		// filtering results: use query string
-		// /api/v1/tours?difficulty=easy&duration=5
+		// /api/v1/tours?difficulty=easy&page=4
+		// page=4 is only for pagination and not an actually query
+		// doing above search in db will return nothing as no tour has page=4
 
-		// Method 1:
-		// const tours = await Tour.find().where('difficulty').equals('easy').where('duration').equals(5);
+		const query = { ...req.query }; // copy obj as query will be modified later
+		const excludedFields = ['page', 'sort', 'limit', 'fields'];
+		excludedFields.forEach(field => delete query[field]);
 
-		// Method 2:
-		// console.log(req.query);
-		const tours = await Tour.find(req.query);
+		const tours = await Tour.find(query);
 
 		res.status(200).json({
 			status: 'success',
