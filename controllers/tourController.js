@@ -32,15 +32,16 @@ module.exports.getAllTours = async (req, res) => {
 		}
 
 		//    e. Pagination
-		//       specify page and limit to show only limit results per page
-		//       so for total of 1000 results and limit=10, there will be 100 pages
-		//       ?limit=10&page=2 gives 2nd page of 100 pages, ie results 11-20
-		//       mongoose works like skip(10).limit(10) to skip 10 results (since we want 11-20)
 		const page = +req.query.page || 1;
 		const limit = +req.query.limit || 10;
 		const skip = (page - 1) * limit;
 
 		query = query.skip(skip).limit(limit);
+
+		if (req.query.page) {
+			const cntDocuments = await Tour.countDocuments();
+			if (skip >= cntDocuments) throw new Error('This page does not exist!');
+		}
 
 		// 2. Execute query
 		const tours = await Tour.find(query);
