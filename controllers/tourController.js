@@ -96,3 +96,38 @@ module.exports.deleteTour = async (req, res) => {
 		});
 	}
 };
+
+module.exports.getTourStats = async (req, res) => {
+	try {
+		// prettier-ignore
+		const stats = await Tour.aggregate([
+            { $match: { ratingsAvg: { $gte: 4.5 } } }, 
+            { 
+                $group: { 
+                    // _id: null,
+                    // _id: '$difficulty',
+                    _id: { $toUpper: '$difficulty' },
+                    numTours: { $sum: 1 },
+                    numRatings: { $sum: '$ratingsQuantity' },
+                    avgRating: { $avg: '$ratingsAvg' },
+                    avgPrice: { $avg: '$price' },
+                    minPrice: { $min: '$price' },
+                    maxPrice: { $max: '$price' },
+                } 
+            },
+            // notice that avgPrice is a variable created using group itself
+            { $sort: { avgPrice: 1 } },
+            // { $match: { _id: { $ne: 'EASY' } } }
+        ]);
+
+		res.status(200).json({
+			status: 'success',
+			data: { stats },
+		});
+	} catch (err) {
+		res.status(500).json({
+			status: 'fail',
+			message: 'Could not get statistics',
+		});
+	}
+};

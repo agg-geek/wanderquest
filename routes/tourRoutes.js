@@ -11,7 +11,9 @@ router
 
 // prettier-ignore
 router.route('/top-5-tours').
-get(tourController.topTours, tourController.getAllTours);
+    get(tourController.topTours, tourController.getAllTours);
+
+router.route('/tour-stats').get(tourController.getTourStats);
 
 // prettier-ignore
 router
