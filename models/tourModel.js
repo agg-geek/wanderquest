@@ -9,9 +9,6 @@ const tourSchema = new mongoose.Schema(
 			unique: true,
 			trim: true,
 		},
-		// defining slug is important otherwise the pre-save hook
-		// that tries to store this.slug wouldn't function as
-		// slug isn't defined in model so won't be stored in db
 		slug: String,
 		price: {
 			type: Number,
@@ -58,6 +55,10 @@ const tourSchema = new mongoose.Schema(
 			select: false,
 		},
 		startDates: [Date],
+		secretTour: {
+			type: Boolean,
+			default: false,
+		},
 	},
 	{
 		toJSON: { virtuals: true },
@@ -69,28 +70,28 @@ tourSchema.virtual('durationWeeks').get(function () {
 	return this.duration / 7;
 });
 
-// DOCUMENT MIDDLEWARE: runs before .save() and .create() (not .insertMany())
-// the fn here is called a pre-save hook
 tourSchema.pre('save', function (next) {
-	// pre-save fn has this pointing to current document
-	// current document, hence document middleware
-	// console.log(this);
 	this.slug = slugify(this.name, { lower: true });
-	// next() is extremely important
 	next();
 });
 
-// multiple pre save hooks
-// tourSchema.pre('save', function (next) {
-// 	console.log('Will save document');
-// 	next();
-// });
-//
-// post hook gets access to the recently saved document
-// tourSchema.post('save', function (doc, next) {
-// 	console.log(doc);
-// 	next();
-// });
+// QUERY MIDDLEWARE
+// .find() returns a mongoose query obj and .find() is a query middleware,
+// so 'this' points to current query obj and not current document
+// we have defined secretTour property and such tours should never appear
+// in getAllTour results
+
+// on every find, this fn will not send secret tours when you request all tours
+// the Tour.find() in getAllTours is the query and before you await that query
+// then this find middleware is run which chains another find to that query
+// this chained find then only queries for non-secret tour documents
+tourSchema.pre('find', function (next) {
+	// find query is effectively equal to secretTour: false
+	// but other tours may not even have this attribute,
+	// hence use this method
+	this.find({ secretTour: { $ne: true } });
+	next();
+});
 
 const Tour = mongoose.model('Tour', tourSchema);
 module.exports = Tour;
