@@ -2,16 +2,22 @@ const Tour = require('./../models/tourModel');
 
 module.exports.getAllTours = async (req, res) => {
 	try {
-		// /api/v1/tours?difficulty=easy&page=4
-		// page=4 is only for pagination and not an actually query
-		// doing above search in db will return nothing as no tour has page=4
+		// Tour.find() returns a mongoose query obj
+		// query obj has a Query.prototype which contains
+		// methods like .where(), .each() etc
+		// some more important things were mentioned, didn't understand
 
-		const query = { ...req.query }; // copy obj as query will be modified later
+		// 1. Build query
+		const queryObj = { ...req.query };
 		const excludedFields = ['page', 'sort', 'limit', 'fields'];
-		excludedFields.forEach(field => delete query[field]);
+		excludedFields.forEach(field => delete queryObj[field]);
 
+		const query = Tour.find(queryObj);
+
+		// 2. Execute query
 		const tours = await Tour.find(query);
 
+		// 3. Send response
 		res.status(200).json({
 			status: 'success',
 			results: tours.length,
