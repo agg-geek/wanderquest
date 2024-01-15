@@ -16,6 +16,19 @@ const tourSchema = new mongoose.Schema(
 			type: Number,
 			required: [true, 'A tour must have a price'],
 		},
+		priceDiscount: {
+			type: Number,
+			validate: {
+				// return true if validation is successful
+				validator: function (discount) {
+					// this only points to current doc on new document creation
+					// it does not work while updating document
+					return discount < this.price;
+				},
+				// {VALUE} refers to the discount, it is provided by mongoose
+				message: 'Discount price ({VALUE}) should be less than regular price',
+			},
+		},
 		duration: {
 			type: Number,
 			required: [true, 'A tour must have a duration'],
@@ -27,7 +40,6 @@ const tourSchema = new mongoose.Schema(
 		difficulty: {
 			type: String,
 			required: [true, 'A tour must have a difficulty'],
-			// enum: ['easy', 'medium', 'difficult'],
 			enum: {
 				values: ['easy', 'medium', 'difficult'],
 				message: 'Difficulty can be either easy, medium or difficult',
@@ -43,7 +55,6 @@ const tourSchema = new mongoose.Schema(
 			type: Number,
 			default: 0,
 		},
-		priceDiscount: Number,
 		summary: {
 			type: String,
 			required: [true, 'A tour must have a summary'],
