@@ -19,13 +19,6 @@ module.exports.getAllTours = async (req, res) => {
 
 module.exports.getTour = async (req, res) => {
 	try {
-		// notice using findOne
-		// using .find() will find all tours matching search criteria
-		// and will return it as an array
-		// also notice using _id
-		// const tour = await Tour.findOne({ _id: req.params.id });
-
-		// notice findById
 		const tour = await Tour.findById(req.params.id);
 
 		res.status(200).json({
@@ -55,18 +48,38 @@ module.exports.createTour = async (req, res) => {
 	}
 };
 
-module.exports.updateTour = (req, res) => {
-	res.status(200).json({
-		status: 'success',
-		data: {
-			tour: '<Updated tour here...>',
-		},
-	});
+module.exports.updateTour = async (req, res) => {
+	try {
+		const tour = await Tour.findByIdAndUpdate(req.params.id, req.body, {
+			new: true,
+			runValidators: true,
+		});
+
+		res.status(200).json({
+			status: 'success',
+			data: { tour },
+		});
+	} catch (err) {
+		res.status(404).json({
+			status: 'fail',
+			// message: err,
+			message: 'Could not update the document',
+		});
+	}
 };
 
-module.exports.deleteTour = (req, res) => {
-	res.status(204).json({
-		status: 'success',
-		data: null,
-	});
+module.exports.deleteTour = async (req, res) => {
+	try {
+		const tour = await Tour.findByIdAndDelete(req.params.id, req.body);
+
+		res.status(204).json({
+			status: 'success',
+			data: null,
+		});
+	} catch (err) {
+		res.status(404).json({
+			status: 'fail',
+			message: 'Could not delete the document',
+		});
+	}
 };
