@@ -24,8 +24,15 @@ module.exports.getAllTours = async (req, res) => {
 		//    c. Implement sorting
 		//       ?sort=price to sort by price
 		//       ?sort=-price to sort by price in descending order
+		//       ?sort=price,ratingsAvg to sort by price, if price is same, sort by ratingsAvg
+		//       req.query looks like { sort: 'price,ratingsAvg' }
+		//       mongoose query should look like .sort('price ratingsAvg')
+
 		if (req.query.sort) {
-			query = query.sort(req.query.sort);
+			const sortBy = req.query.sort.split(',').join(' ');
+			query = query.sort(sortBy);
+		} else {
+			query = query.sort('-createdAt'); // sort by newest
 		}
 
 		// 2. Execute query
