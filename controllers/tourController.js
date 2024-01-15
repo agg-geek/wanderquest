@@ -1,17 +1,15 @@
 const APIFeatures = require('./../utils/apiFeatures');
 const Tour = require('./../models/tourModel');
 
-// middleware to prefill parts of req so this filled req obj goes to getAllTours
 module.exports.topTours = (req, res, next) => {
-	req.query.limit = '5'; // notice string '5'
-	req.query.sort = '-ratingsAvg,price'; // notice no spaces and commas
+	req.query.limit = '5';
+	req.query.sort = '-ratingsAvg,price';
 	req.query.fields = 'name,ratingsAvg,difficulty,summary,price';
 	next();
 };
 
 module.exports.getAllTours = async (req, res) => {
 	try {
-		// notice mongoose obj: Tour.find()
 		const features = new APIFeatures(Tour.find(), req.query);
 		features.filter().sort().limitFields().paginate();
 
@@ -75,7 +73,6 @@ module.exports.updateTour = async (req, res) => {
 	} catch (err) {
 		res.status(404).json({
 			status: 'fail',
-			// message: err,
 			message: 'Could not update the document',
 		});
 	}
@@ -83,7 +80,7 @@ module.exports.updateTour = async (req, res) => {
 
 module.exports.deleteTour = async (req, res) => {
 	try {
-		const tour = await Tour.findByIdAndDelete(req.params.id, req.body);
+		await Tour.findByIdAndDelete(req.params.id, req.body);
 
 		res.status(204).json({
 			status: 'success',
@@ -99,26 +96,21 @@ module.exports.deleteTour = async (req, res) => {
 
 module.exports.getTourStats = async (req, res) => {
 	try {
-		// prettier-ignore
 		const stats = await Tour.aggregate([
-            { $match: { ratingsAvg: { $gte: 4.5 } } }, 
-            { 
-                $group: { 
-                    // _id: null,
-                    // _id: '$difficulty',
-                    _id: { $toUpper: '$difficulty' },
-                    numTours: { $sum: 1 },
-                    numRatings: { $sum: '$ratingsQuantity' },
-                    avgRating: { $avg: '$ratingsAvg' },
-                    avgPrice: { $avg: '$price' },
-                    minPrice: { $min: '$price' },
-                    maxPrice: { $max: '$price' },
-                } 
-            },
-            // notice that avgPrice is a variable created using group itself
-            { $sort: { avgPrice: 1 } },
-            // { $match: { _id: { $ne: 'EASY' } } }
-        ]);
+			{ $match: { ratingsAvg: { $gte: 4.5 } } },
+			{
+				$group: {
+					_id: '$difficulty',
+					numTours: { $sum: 1 },
+					numRatings: { $sum: '$ratingsQuantity' },
+					avgRating: { $avg: '$ratingsAvg' },
+					avgPrice: { $avg: '$price' },
+					minPrice: { $min: '$price' },
+					maxPrice: { $max: '$price' },
+				},
+			},
+			{ $sort: { avgPrice: 1 } },
+		]);
 
 		res.status(200).json({
 			status: 'success',
@@ -132,10 +124,6 @@ module.exports.getTourStats = async (req, res) => {
 	}
 };
 
-// you hit /monthly-plan/2021 endpoint, return the monthly plan of 2021
-// there is startDates array containing starting dates of tour in a year
-// use unwind which creates a new document for each elem in array (startDates)
-// checkout aggregation pipeline stages and aggregation pipeline operators
 module.exports.getMontlyPlan = async (req, res) => {
 	try {
 		const year = +req.params.year;

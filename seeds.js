@@ -10,7 +10,9 @@ mongoose
 	.then(() => console.log('Successfully connected to the database!'))
 	.catch(() => console.log('Connection to database failed'));
 
-const tours = JSON.parse(fs.readFileSync(`${__dirname}/dev-files/data/tours-simple.json`, 'utf-8'));
+const tours = JSON.parse(
+	fs.readFileSync(`${__dirname}/dev-files/data/tours-simple.json`, 'utf-8')
+);
 
 const deleteTours = async () => {
 	try {
@@ -31,8 +33,6 @@ const importTours = async () => {
 	}
 	process.exit();
 };
-
-// console.log(process.argv);
 
 if (process.argv[2] === '--importT') importTours();
 else if (process.argv[2] === '--deleteT') deleteTours();

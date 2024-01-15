@@ -1,5 +1,4 @@
 class APIFeatures {
-	// query: mongoose query; queryObj: req.query
 	constructor(query, queryObj) {
 		this.query = query;
 		this.queryObj = queryObj;
@@ -11,10 +10,13 @@ class APIFeatures {
 		excludedFields.forEach(field => delete queryObjCopy[field]);
 
 		let queryObjCopyStr = JSON.stringify(queryObjCopy);
-		queryObjCopyStr = queryObjCopyStr.replace(/\b(gte|gt|lte|lt)\b/g, match => `$${match}`);
+		queryObjCopyStr = queryObjCopyStr.replace(
+			/\b(gte|gt|lte|lt)\b/g,
+			match => `$${match}`
+		);
 		this.query = this.query.find(JSON.parse(queryObjCopyStr));
 
-		return this; // notice!
+		return this;
 	}
 
 	sort() {

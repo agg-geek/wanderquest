@@ -11,8 +11,6 @@ const tourSchema = new mongoose.Schema(
 			trim: true,
 			minlength: [10, 'A tour name must have atleast 10 characters'],
 			maxlength: [40, 'A tour name must have atmost 40 characters'],
-			// validator is the library and isAlphanumeric is the method
-			// validate: validator.isAlphanumeric,
 			validate: {
 				validator: tourName => validator.isAlphanumeric(tourName, 'en-GB', { ignore: ' ' }),
 				message: 'Tour name must only contain characters',
