@@ -15,6 +15,8 @@ router.route('/top-5-tours').
 
 router.route('/tour-stats').get(tourController.getTourStats);
 
+router.route('/monthly-plan/:year').get(tourController.getMontlyPlan);
+
 // prettier-ignore
 router
     .route('/:id')

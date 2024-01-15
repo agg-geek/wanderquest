@@ -131,3 +131,45 @@ module.exports.getTourStats = async (req, res) => {
 		});
 	}
 };
+
+// you hit /monthly-plan/2021 endpoint, return the monthly plan of 2021
+// there is startDates array containing starting dates of tour in a year
+// use unwind which creates a new document for each elem in array (startDates)
+// checkout aggregation pipeline stages and aggregation pipeline operators
+module.exports.getMontlyPlan = async (req, res) => {
+	try {
+		const year = +req.params.year;
+
+		const plan = await Tour.aggregate([
+			{ $unwind: '$startDates' },
+			{
+				$match: {
+					startDates: {
+						$gte: new Date(`${year}-01-01`),
+						$lte: new Date(`${year}-12-31`),
+					},
+				},
+			},
+			{
+				$group: {
+					_id: { $month: '$startDates' },
+					numTours: { $sum: 1 },
+					tours: { $push: '$name' },
+				},
+			},
+			{ $addFields: { month: '$_id' } },
+			{ $project: { _id: 0 } },
+			{ $sort: { numTours: -1 } },
+		]);
+
+		res.status(200).json({
+			status: 'success',
+			data: { plan },
+		});
+	} catch (err) {
+		res.status(500).json({
+			status: 'fail',
+			message: 'Could not get statistics',
+		});
+	}
+};
