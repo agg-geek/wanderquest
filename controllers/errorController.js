@@ -8,10 +8,20 @@ const sendDevError = (err, res) => {
 };
 
 const sendProdError = (err, res) => {
-	res.status(err.statusCode).json({
-		status: err.status,
-		message: err.message,
-	});
+	if (err.isOperational) {
+		// Our custom errors, trustable, can send this to the client
+		res.status(err.statusCode).json({
+			status: err.status,
+			message: err.message,
+		});
+	} else {
+		// some unexpected programming error / bug, don't send to client
+		console.error(err);
+		res.status(err.statusCode).json({
+			status: '500',
+			message: 'Something went wrong',
+		});
+	}
 };
 
 module.exports = (err, req, res, next) => {
