@@ -26,10 +26,6 @@ module.exports.getAllTours = catchAsync(async (req, res, next) => {
 module.exports.getTour = catchAsync(async (req, res, next) => {
 	const tour = await Tour.findById(req.params.id);
 
-	// getTour with a valid ObjectID format but an ID which does not exist
-	// we would get { "status": "success", "data": { "tour": null } }
-	// status is success with tour is null as mongoose does not find a tour with that ID
-	// notice returning next(err), otherwise we will send 2 responses
 	if (!tour) return next(new AppError('No tour found with that ID', 404));
 
 	res.status(200).json({
