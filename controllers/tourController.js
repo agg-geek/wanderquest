@@ -1,6 +1,7 @@
 const APIFeatures = require('./../utils/apiFeatures');
 const Tour = require('./../models/tourModel');
 const catchAsync = require('./../utils/catchAsync');
+const AppError = require('./../utils/appError');
 
 module.exports.topTours = (req, res, next) => {
 	req.query.limit = '5';
@@ -9,8 +10,6 @@ module.exports.topTours = (req, res, next) => {
 	next();
 };
 
-// note that we also need to add next to add the functions
-// as catchAsync needs it
 module.exports.getAllTours = catchAsync(async (req, res, next) => {
 	const features = new APIFeatures(Tour.find(), req.query);
 	features.filter().sort().limitFields().paginate();
@@ -26,6 +25,12 @@ module.exports.getAllTours = catchAsync(async (req, res, next) => {
 
 module.exports.getTour = catchAsync(async (req, res, next) => {
 	const tour = await Tour.findById(req.params.id);
+
+	// getTour with a valid ObjectID format but an ID which does not exist
+	// we would get { "status": "success", "data": { "tour": null } }
+	// status is success with tour is null as mongoose does not find a tour with that ID
+	// notice returning next(err), otherwise we will send 2 responses
+	if (!tour) return next(new AppError('No tour found with that ID', 404));
 
 	res.status(200).json({
 		status: 'success',
@@ -47,6 +52,8 @@ module.exports.updateTour = catchAsync(async (req, res, next) => {
 		runValidators: true,
 	});
 
+	if (!tour) return next(new AppError('No tour found with that ID', 404));
+
 	res.status(200).json({
 		status: 'success',
 		data: { tour },
@@ -54,7 +61,9 @@ module.exports.updateTour = catchAsync(async (req, res, next) => {
 });
 
 module.exports.deleteTour = catchAsync(async (req, res, next) => {
-	await Tour.findByIdAndDelete(req.params.id, req.body);
+	const tour = await Tour.findByIdAndDelete(req.params.id, req.body);
+
+	if (!tour) return next(new AppError('No tour found with that ID', 404));
 
 	res.status(204).json({
 		status: 'success',
