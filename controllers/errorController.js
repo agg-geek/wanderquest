@@ -10,6 +10,12 @@ const handleDBDuplicateError = err => {
 	return new AppError(message, 400);
 };
 
+const handleDBValidationError = err => {
+	const errors = Object.values(err.errors).map(err => err.message);
+	const message = `Invalid input data. ${errors.join('. ')}.`;
+	return new AppError(message, 400);
+};
+
 const sendDevError = (err, res) => {
 	res.status(err.statusCode).json({
 		status: err.status,
@@ -42,10 +48,13 @@ module.exports = (err, req, res, next) => {
 		sendDevError(err, res);
 	} else {
 		if (err.name === 'CastError') err = handleDBCastError(err);
-
-		// tour has a field name which can take only unique values
-		// we handle the duplicate values entered as the tour name
 		if (err.code === 11000) err = handleDBDuplicateError(err);
+
+		// if you updateTour with invalid data say:
+		// { "name": "hello", "difficulty": "nothing" }
+		// where name is too short (min 10 characters reqd) and difficulty is invalid
+		// we get mongoose validation error (this is not a mongodb error)
+		if (err.name === 'ValidationError') err = handleDBValidationError(err);
 		sendProdError(err, res);
 	}
 };
