@@ -22,6 +22,15 @@ const userSchema = new mongoose.Schema({
 	passwordConfirm: {
 		type: String,
 		required: [true, 'Please confirm your password'],
+		validate: {
+			// normal function declaration as this keyword
+			// works only on save / create
+			// hence, don't update user by findByIdAndUpdate, you need to use save
+			validator: function (pwdConfirm) {
+				return pwdConfirm === this.password;
+			},
+			message: 'Confirm password does not match password',
+		},
 	},
 });
 
