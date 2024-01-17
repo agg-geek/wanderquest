@@ -1,5 +1,6 @@
 const mongoose = require('mongoose');
 const validator = require('validator');
+const bcrypt = require('bcryptjs');
 
 const userSchema = new mongoose.Schema({
 	name: {
@@ -23,15 +24,21 @@ const userSchema = new mongoose.Schema({
 		type: String,
 		required: [true, 'Please confirm your password'],
 		validate: {
-			// normal function declaration as this keyword
-			// works only on save / create
-			// hence, don't update user by findByIdAndUpdate, you need to use save
 			validator: function (pwdConfirm) {
 				return pwdConfirm === this.password;
 			},
 			message: 'Confirm password does not match password',
 		},
 	},
+});
+
+userSchema.pre('save', async function (next) {
+	this.password = await bcrypt.hash(this.password, 12);
+	// pwdConfirm is only to make sure user enters the correct pwd
+	// once the pwds have been validated to be same,
+	// then we no longer need to store pwdConfirm's value in db
+	this.passwordConfirm = undefined;
+	next();
 });
 
 const User = mongoose.model('User', userSchema);
