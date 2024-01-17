@@ -17,6 +17,7 @@ module.exports.signup = catchAsync(async (req, res, next) => {
 		email: req.body.email,
 		password: req.body.password,
 		passwordConfirm: req.body.passwordConfirm,
+		passwordChangedAt: req.body.passwordChangedAt,
 	});
 
 	const token = signToken(newUser._id);
@@ -70,16 +71,16 @@ module.exports.isLoggedIn = catchAsync(async (req, res, next) => {
 
 	// 3. Check if user still exists
 
-	// if we have reached here, then that means the token was correct
-	// and a user belonging to that token actually existed
-	// however, the user might have deleted his account and so no longer exists
-	const user = await User.findById(payload._id);
-	if (!user)
+	const currentUser = await User.findById(payload.id);
+	if (!currentUser)
 		return next(new AppError('User with this token does not exist', 401));
 
 	// ===============================
 
 	// 4. Check if user changed pwd after the token was issued
+	if (currentUser.checkPasswordChange(payload.iat))
+		// prettier-ignore
+		return next(new AppError('Password was changed recently. Please login again.', 401));
 
 	next();
 });
