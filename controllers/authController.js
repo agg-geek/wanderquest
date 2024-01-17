@@ -64,25 +64,21 @@ module.exports.isLoggedIn = catchAsync(async (req, res, next) => {
 
 	// 2. Handle invalid and expired token
 
-	// jwt verify is an async fn which takes a 3rd param as the callback fn
-	// which will run once the token has been verified
-	// since we want to keep using async await and not callbacks, we promisify the fn
-	// using the builin util package method promisify
 	const payload = await promisify(jwt.verify)(token, process.env.JWT_SECRET);
-
-	// console.log(payload); // { id: '65a789edb2c605a57f59f004', iat: 1705490960, exp: 1708082960
-	// iat: creation data, exp: expiration date, automatically set by jwt
-
-	// change the payload in the token a bit using jwt debugger,
-	// jwt throws a jsonWebTokenError: invalid signature
-	// which we handle in the errorController
-	// also, use a expired token (set expiresIn in config.env to 5000)
-	// token expired error is also handled in errorController
-	// thus, we raise relevant errors and handle invalid and expired tokens
 
 	// ===============================
 
 	// 3. Check if user still exists
+
+	// if we have reached here, then that means the token was correct
+	// and a user belonging to that token actually existed
+	// however, the user might have deleted his account and so no longer exists
+	const user = await User.findById(payload._id);
+	if (!user)
+		return next(new AppError('User with this token does not exist', 401));
+
+	// ===============================
+
 	// 4. Check if user changed pwd after the token was issued
 
 	next();
