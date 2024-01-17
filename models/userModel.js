@@ -15,6 +15,11 @@ const userSchema = new mongoose.Schema({
 		validate: [validator.isEmail, 'Please enter a valid email'],
 	},
 	photo: String,
+	role: {
+		type: String,
+		enum: ['user', 'guide', 'lead', 'admin'],
+		default: 'user',
+	},
 	password: {
 		type: String,
 		required: [true, 'Password is required'],
@@ -31,10 +36,6 @@ const userSchema = new mongoose.Schema({
 			message: 'Confirm password does not match password',
 		},
 	},
-	// this field will be implemented in the future
-	// for now, just edit a  user and mention this field
-	// in date format '2024-08-30' for testing
-	// mongodb will appropriately parse this as an ISOString
 	passwordChangedAt: Date,
 });
 
@@ -50,16 +51,9 @@ userSchema.methods.checkPassword = async (userPwd, enteredPwd) => {
 	return await bcrypt.compare(enteredPwd, userPwd);
 };
 
-// returns true if password was changed after entered timestamp
-// notice this is an instance method so this refers to document (user)
 userSchema.methods.checkPasswordChange = function (jwtTimestamp) {
-	// users who never changed their password will have this
-	// passwordChangedAt undefined, so handle them
 	if (!this.passwordChangedAt) return false;
 
-	// passwordChangedAt is an isostring
-	// getTime will convert isostring to time in milliseconds
-	// jwt timestamp is in ms, so divide by 1000
 	const changedTimestamp = this.passwordChangedAt.getTime() / 1000;
 	return jwtTimestamp < changedTimestamp;
 };
