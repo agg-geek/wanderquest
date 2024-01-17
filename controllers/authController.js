@@ -1,3 +1,4 @@
+const { promisify } = require('util');
 const jwt = require('jsonwebtoken');
 
 const User = require('./../models/userModel');
@@ -51,8 +52,6 @@ module.exports.login = catchAsync(async (req, res, next) => {
 	});
 });
 
-// we protect route getALLTours
-// user can see get all tours only if he is logged in
 module.exports.isLoggedIn = catchAsync(async (req, res, next) => {
 	// 1. Get token, if not present, return
 	let token;
@@ -64,6 +63,25 @@ module.exports.isLoggedIn = catchAsync(async (req, res, next) => {
 	// ===============================
 
 	// 2. Handle invalid and expired token
+
+	// jwt verify is an async fn which takes a 3rd param as the callback fn
+	// which will run once the token has been verified
+	// since we want to keep using async await and not callbacks, we promisify the fn
+	// using the builin util package method promisify
+	const payload = await promisify(jwt.verify)(token, process.env.JWT_SECRET);
+
+	// console.log(payload); // { id: '65a789edb2c605a57f59f004', iat: 1705490960, exp: 1708082960
+	// iat: creation data, exp: expiration date, automatically set by jwt
+
+	// change the payload in the token a bit using jwt debugger,
+	// jwt throws a jsonWebTokenError: invalid signature
+	// which we handle in the errorController
+	// also, use a expired token (set expiresIn in config.env to 5000)
+	// token expired error is also handled in errorController
+	// thus, we raise relevant errors and handle invalid and expired tokens
+
+	// ===============================
+
 	// 3. Check if user still exists
 	// 4. Check if user changed pwd after the token was issued
 
