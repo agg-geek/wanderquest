@@ -41,5 +41,14 @@ userSchema.pre('save', async function (next) {
 	next();
 });
 
+// instance method: available on all instances (documents)
+userSchema.methods.checkPassword = async (userPwd, enteredPwd) => {
+	// we also pass in the userPwd which should already by available
+	// on this (document) using this.password
+	// but since password has select: false, it cannot be accessed
+	// returns true if password is correct
+	return await bcrypt.compare(enteredPwd, userPwd);
+};
+
 const User = mongoose.model('User', userSchema);
 module.exports = User;
