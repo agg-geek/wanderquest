@@ -83,3 +83,34 @@ module.exports.authorize = (...roles) => {
 		next();
 	};
 };
+
+// FORGOT PASSWORD FUNCTIONALITY
+// 1. user sends a post request to forgotPassword route containing his email,
+// and gets a token (not jwt)
+
+module.exports.forgotPassword = catchAsync(async (req, res, next) => {
+	// 1. Get user from received email
+	const user = await User.findOne({ email: req.body.email });
+	if (!user) return next(new AppError('User does not exist', 404));
+
+	// 2. generate random token
+
+	// createPasswordResetToken is an instance method
+	// it sets the reset token and expiry fields on the user obj
+	const resetToken = user.createPasswordResetToken();
+
+	// we also need to save the reset token and expiry to the database
+	// as the above instance method just created fields on obj
+	// but we also need to save the reset token and expiry to db
+	// await user.save();
+
+	// the above simple save does not work do we set validation false
+	// as the user does not contain the passwordConfirm (validation fails)
+	// it contains all fields (as it is findOne from the db) but passwordConfirm is set to undefined
+	// use res.json(user) to check yourself!
+	await user.save({ validateBeforeSave: false });
+
+	// 3. send token to user's email
+});
+
+// 2. user sends the token along with new password to update passsword
