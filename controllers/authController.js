@@ -11,15 +11,19 @@ module.exports.signup = catchAsync(async (req, res, next) => {
 		passwordConfirm: req.body.passwordConfirm,
 	});
 
-	// since we are signing up the user, we should also log him in
-	// so by sending the token, we also log in the user
 	const token = jwt.sign({ id: newUser._id }, process.env.JWT_SECRET, {
 		expiresIn: process.env.JWT_EXPIRE_TIME,
 	});
 
+	// don't send the password when user is created
+	// passwordConfirm is also a field but that is undefined
+	// so it isn't getting send in res,
+	// though you can choose to remove it yourself
+	const { password, ...userData } = newUser._doc;
+
 	res.status(201).json({
 		status: 'success',
-		data: { user: newUser },
+		data: { user: userData },
 		token,
 	});
 });
