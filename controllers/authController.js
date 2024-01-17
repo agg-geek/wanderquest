@@ -2,6 +2,13 @@ const jwt = require('jsonwebtoken');
 
 const User = require('./../models/userModel');
 const catchAsync = require('./../utils/catchAsync');
+const AppError = require('./../utils/appError');
+
+const signToken = id => {
+	return jwt.sign({ id }, process.env.JWT_SECRET, {
+		expiresIn: process.env.JWT_EXPIRE_TIME,
+	});
+};
 
 module.exports.signup = catchAsync(async (req, res, next) => {
 	const newUser = await User.create({
@@ -11,19 +18,40 @@ module.exports.signup = catchAsync(async (req, res, next) => {
 		passwordConfirm: req.body.passwordConfirm,
 	});
 
-	const token = jwt.sign({ id: newUser._id }, process.env.JWT_SECRET, {
-		expiresIn: process.env.JWT_EXPIRE_TIME,
-	});
+	const token = signToken(newUser._id);
 
-	// don't send the password when user is created
-	// passwordConfirm is also a field but that is undefined
-	// so it isn't getting send in res,
-	// though you can choose to remove it yourself
 	const { password, ...userData } = newUser._doc;
 
 	res.status(201).json({
 		status: 'success',
 		data: { user: userData },
+		token,
+	});
+});
+
+module.exports.login = catchAsync(async (req, res, next) => {
+	const { email, password } = req.body;
+
+	if (!email || !password) {
+		return next(new AppError('Email or password is missing', 400));
+	}
+
+	// document returned from findOne will not have password field
+	// as has been set to select: false
+	const user = await User.findOne({ email }).select('+password');
+	const correctPwd = await user?.checkPassword(user.password, password);
+
+	if (!user || !correctPwd) {
+		// we handle both cases together here to intentionally send a vague msg
+		// and not specifying what is wrong exactly
+		// though notice that for correctPwd, we have user?.
+		return next(new AppError('Incorrect email or password', 401));
+	}
+
+	const token = signToken(user._id);
+
+	res.json({
+		status: 'success',
 		token,
 	});
 });
