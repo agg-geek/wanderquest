@@ -5,6 +5,11 @@ const handleDBCastError = err => {
 	return new AppError(message, 400);
 };
 
+const handleDBDuplicateError = err => {
+	const message = `Duplicate field value: '${err.keyValue.name}'`;
+	return new AppError(message, 400);
+};
+
 const sendDevError = (err, res) => {
 	res.status(err.statusCode).json({
 		status: err.status,
@@ -36,18 +41,11 @@ module.exports = (err, req, res, next) => {
 	if (process.env.NODE_ENV === 'development') {
 		sendDevError(err, res);
 	} else {
-		// ===============================
-		// BUG: why aren't original and duplicates the same?
-		let error = { ...err };
-		res.json({
-			original: err,
-			duplicate: error,
-		});
-		// if (error.name === 'CastError') error = handleDBCastError(error);
-		// sendProdError(error, res);
-		// ===============================
+		if (err.name === 'CastError') err = handleDBCastError(err);
 
-		// if (err.name === 'CastError') err = handleDBCastError(err);
-		// sendProdError(err, res);
+		// tour has a field name which can take only unique values
+		// we handle the duplicate values entered as the tour name
+		if (err.code === 11000) err = handleDBDuplicateError(err);
+		sendProdError(err, res);
 	}
 };
