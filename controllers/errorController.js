@@ -49,11 +49,6 @@ module.exports = (err, req, res, next) => {
 	} else {
 		if (err.name === 'CastError') err = handleDBCastError(err);
 		if (err.code === 11000) err = handleDBDuplicateError(err);
-
-		// if you updateTour with invalid data say:
-		// { "name": "hello", "difficulty": "nothing" }
-		// where name is too short (min 10 characters reqd) and difficulty is invalid
-		// we get mongoose validation error (this is not a mongodb error)
 		if (err.name === 'ValidationError') err = handleDBValidationError(err);
 		sendProdError(err, res);
 	}
