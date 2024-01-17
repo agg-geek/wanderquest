@@ -1,10 +1,9 @@
+const jwt = require('jsonwebtoken');
+
 const User = require('./../models/userModel');
 const catchAsync = require('./../utils/catchAsync');
 
 module.exports.signup = catchAsync(async (req, res, next) => {
-	// using the complete req.body has a serious security flaw
-	// like a user may state his role: 'admin' (which we will define in the model later)
-	// and thus become a user
 	const newUser = await User.create({
 		name: req.body.name,
 		email: req.body.email,
@@ -12,8 +11,15 @@ module.exports.signup = catchAsync(async (req, res, next) => {
 		passwordConfirm: req.body.passwordConfirm,
 	});
 
+	// since we are signing up the user, we should also log him in
+	// so by sending the token, we also log in the user
+	const token = jwt.sign({ id: newUser._id }, process.env.JWT_SECRET, {
+		expiresIn: process.env.JWT_EXPIRE_TIME,
+	});
+
 	res.status(201).json({
 		status: 'success',
 		data: { user: newUser },
+		token,
 	});
 });

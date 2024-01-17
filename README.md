@@ -14,6 +14,8 @@ Error handling with Express
 
 ## To-do
 
+-   Authentication with JWT
+
 ## Issues
 
 -   Bug in errorController when error object is copied
