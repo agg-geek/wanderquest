@@ -16,6 +16,12 @@ app.use(express.json());
 
 app.use(express.static(`${__dirname}/public`));
 
+// can be used to check the headers on every request
+// app.use((req, res, next) => {
+// 	console.log(req.headers);
+// 	next();
+// });
+
 app.use('/api/v1/tours', tourRouter);
 app.use('/api/v1/users', userRouter);
 

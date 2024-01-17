@@ -36,15 +36,10 @@ module.exports.login = catchAsync(async (req, res, next) => {
 		return next(new AppError('Email or password is missing', 400));
 	}
 
-	// document returned from findOne will not have password field
-	// as has been set to select: false
 	const user = await User.findOne({ email }).select('+password');
 	const correctPwd = await user?.checkPassword(user.password, password);
 
 	if (!user || !correctPwd) {
-		// we handle both cases together here to intentionally send a vague msg
-		// and not specifying what is wrong exactly
-		// though notice that for correctPwd, we have user?.
 		return next(new AppError('Incorrect email or password', 401));
 	}
 
@@ -54,4 +49,23 @@ module.exports.login = catchAsync(async (req, res, next) => {
 		status: 'success',
 		token,
 	});
+});
+
+// we protect route getALLTours
+// user can see get all tours only if he is logged in
+module.exports.isLoggedIn = catchAsync(async (req, res, next) => {
+	// 1. Get token, if not present, return
+	let token;
+	if (req.headers.authorization?.startsWith('Bearer'))
+		token = req.headers.authorization.split(' ')[1];
+
+	if (!token) return next(new AppError('Please login to view', 401));
+
+	// ===============================
+
+	// 2. Handle invalid and expired token
+	// 3. Check if user still exists
+	// 4. Check if user changed pwd after the token was issued
+
+	next();
 });
