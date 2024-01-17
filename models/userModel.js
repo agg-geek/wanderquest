@@ -33,10 +33,9 @@ const userSchema = new mongoose.Schema({
 });
 
 userSchema.pre('save', async function (next) {
+	if (!this.isModified('password')) return next();
+
 	this.password = await bcrypt.hash(this.password, 12);
-	// pwdConfirm is only to make sure user enters the correct pwd
-	// once the pwds have been validated to be same,
-	// then we no longer need to store pwdConfirm's value in db
 	this.passwordConfirm = undefined;
 	next();
 });
