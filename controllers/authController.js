@@ -85,10 +85,6 @@ module.exports.authorize = (...roles) => {
 	};
 };
 
-// FORGOT PASSWORD FUNCTIONALITY
-// 1. user sends a post request to forgotPassword route containing his email,
-// and gets a token (not jwt)
-
 module.exports.forgotPassword = catchAsync(async (req, res, next) => {
 	const user = await User.findOne({ email: req.body.email });
 	if (!user) return next(new AppError('User does not exist', 404));
@@ -125,13 +121,7 @@ module.exports.forgotPassword = catchAsync(async (req, res, next) => {
 	}
 });
 
-// 2. user sends the token along with new password and passwordConfirm to update passsword
 exports.resetPassword = catchAsync(async (req, res, next) => {
-	// 1) Get user based on the token
-	// we had sent the user unencrypted token and we stored the encrypted token in db
-	// so since we get the unencrypted token from user,
-	// we first encrypt it and compare it with that in db
-	// notice that we get the token from the param
 	// prettier-ignore
 	const hashedToken = crypto.createHash('sha256').update(req.params.token).digest('hex');
 
@@ -140,9 +130,6 @@ exports.resetPassword = catchAsync(async (req, res, next) => {
 		passwordResetExpires: { $gt: Date.now() },
 	});
 
-	// 2) If token has not expired, and there is user, set the new password
-	// notice that we already checked for expired token above using $gt: Date.now()
-	// so now just check for no user
 	if (!user) return next(new AppError('Token is invalid or expired', 400));
 
 	user.password = req.body.password;
@@ -150,19 +137,36 @@ exports.resetPassword = catchAsync(async (req, res, next) => {
 	user.passwordResetToken = undefined;
 	user.passwordResetExpires = undefined;
 
-	// we now run save and not findOneAndUpdate because we need to run all the validators
-	// and the save middleware fns
-	// when you don't need to run the validators, you still need the save fn
-	// as you need to run the middleware
-	await user.save(); // notice we don't have the validateBeforeSave: false anymore
+	await user.save();
 
-	// 3) Update changedPasswordAt property for the user
-	// see the middleware in userModel for this
-
-	// 4) Log the user in, send JWT
 	const token = signToken(user._id);
-
 	res.json({
+		status: 'success',
+		token,
+	});
+});
+
+// a logged in user will send a post request containing his currentPwd
+// along with newPwd and newPwdConfirm which contain the new password
+exports.updatePassword = catchAsync(async (req, res, next) => {
+	const { currentPwd, newPwd, newPwdConfirm } = req.body;
+	if (!currentPwd || !newPwd || !newPwdConfirm)
+		return next(new AppError('A required password is missing', 400));
+
+	// since the user has to be logged in, we will run isLoggedIn before this fn,
+	// so identify the logged in user using req.user
+	const user = await User.findById(req.user.id).select('+password');
+
+	const correctPwd = await user.checkPassword(user.password, currentPwd);
+	if (!correctPwd) return next(new AppError('Current password is incorrect', 401));
+
+	user.password = newPwd;
+	user.passwordConfirm = newPwdConfirm;
+	// User.findByIdAndUpdate will NOT work as intended!
+	await user.save();
+
+	const token = signToken(user._id);
+	res.status(200).json({
 		status: 'success',
 		token,
 	});
