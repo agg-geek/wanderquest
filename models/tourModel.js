@@ -137,6 +137,16 @@ tourSchema.pre(/^find/, function (next) {
 	next();
 });
 
+// populate the user fields everytime we find anything
+// using query middleware
+tourSchema.pre(/^find/, function (next) {
+	this.populate({
+		path: 'guides',
+		select: '-passwordChangedAt -__v',
+	});
+	next();
+});
+
 tourSchema.pre('aggregate', function (next) {
 	this.pipeline().unshift({ $match: { secretTour: { $ne: true } } });
 	next();
