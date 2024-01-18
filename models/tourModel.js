@@ -137,8 +137,6 @@ tourSchema.pre(/^find/, function (next) {
 	next();
 });
 
-// populate the user fields everytime we find anything
-// using query middleware
 tourSchema.pre(/^find/, function (next) {
 	this.populate({
 		path: 'guides',
