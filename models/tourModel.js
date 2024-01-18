@@ -12,7 +12,8 @@ const tourSchema = new mongoose.Schema(
 			minlength: [10, 'A tour name must have atleast 10 characters'],
 			maxlength: [40, 'A tour name must have atmost 40 characters'],
 			validate: {
-				validator: tourName => validator.isAlphanumeric(tourName, 'en-GB', { ignore: ' ' }),
+				validator: tourName =>
+					validator.isAlphanumeric(tourName, 'en-GB', { ignore: ' ' }),
 				message: 'Tour name must only contain characters',
 			},
 		},
@@ -80,6 +81,47 @@ const tourSchema = new mongoose.Schema(
 			type: Boolean,
 			default: false,
 		},
+		// start location is the start location of the tour
+		// start location is GeoJSON data
+		// to make it GeoJSON, it needs a type and coordinates
+		// this object literal here for startLocation
+		// is not a schema type obj like others
+		// it is an embedded obj itself
+		startLocation: {
+			// type itself is variable whose schematype obj is mentioned
+			type: {
+				// this type String is the type of 'type' variable above
+				type: String,
+				default: 'Point',
+				enum: ['Point'],
+			},
+			// type of coordinates is an array of Number
+			// for GeoJSON, this array is [lng, lat]
+			coordinates: [Number],
+			address: String,
+			description: String,
+		},
+		// we model tours and location by embedding locations in the tour itself
+		// so each element of locations is a document in itself
+		// notice that tours.json has an ID on every locations elem
+		// which means that each location is a document, embedded into tours
+
+		// locations is an array of stops of the tour
+		// it is an array of GeoJSON elements itself
+		locations: [
+			{
+				type: {
+					type: String,
+					default: 'Point',
+					enum: ['Point'],
+				},
+				coordinates: [Number],
+				address: String,
+				description: String,
+				// day of the tour when you reach this location
+				day: Number,
+			},
+		],
 	},
 	{
 		toJSON: { virtuals: true },

@@ -11,7 +11,7 @@ mongoose
 	.catch(() => console.log('Connection to database failed'));
 
 const tours = JSON.parse(
-	fs.readFileSync(`${__dirname}/dev-files/data/tours-simple.json`, 'utf-8')
+	fs.readFileSync(`${__dirname}/dev-files/data/tours.json`, 'utf-8')
 );
 
 const deleteTours = async () => {
