@@ -146,15 +146,11 @@ exports.resetPassword = catchAsync(async (req, res, next) => {
 	});
 });
 
-// a logged in user will send a post request containing his currentPwd
-// along with newPwd and newPwdConfirm which contain the new password
 exports.updatePassword = catchAsync(async (req, res, next) => {
 	const { currentPwd, newPwd, newPwdConfirm } = req.body;
 	if (!currentPwd || !newPwd || !newPwdConfirm)
 		return next(new AppError('A required password is missing', 400));
 
-	// since the user has to be logged in, we will run isLoggedIn before this fn,
-	// so identify the logged in user using req.user
 	const user = await User.findById(req.user.id).select('+password');
 
 	const correctPwd = await user.checkPassword(user.password, currentPwd);
@@ -162,7 +158,6 @@ exports.updatePassword = catchAsync(async (req, res, next) => {
 
 	user.password = newPwd;
 	user.passwordConfirm = newPwdConfirm;
-	// User.findByIdAndUpdate will NOT work as intended!
 	await user.save();
 
 	const token = signToken(user._id);

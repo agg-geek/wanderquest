@@ -14,7 +14,8 @@ Error handling with Express
 
 ## To-do
 
--   Authentication with JWT
+-   Authentication with JWT theory
+-   `/users/update-details` sends passwordChangedAt, \_\_v fields
 
 ## Issues
 

@@ -7,10 +7,15 @@ const router = express.Router();
 router.post('/signup', authController.signup);
 router.post('/login', authController.login);
 
+router.patch('/update-details', authController.isLoggedIn, userController.updateDetails);
+router.patch(
+	'/update-password',
+	authController.isLoggedIn,
+	authController.updatePassword
+);
+
 router.post('/forgot-password', authController.forgotPassword);
 router.patch('/reset-password/:token', authController.resetPassword);
-
-router.patch('/update-password', authController.isLoggedIn, authController.updatePassword);
 
 router.route('/').get(userController.getAllUsers).post(userController.createUser);
 
