@@ -26,9 +26,6 @@ module.exports.createUser = (req, res, next) => {
 	});
 };
 
-// a logged in user can update his name and email
-// password update is not allowed
-// this route is intended for the user himself and not the admin
 module.exports.updateDetails = catchAsync(async (req, res, next) => {
 	if (req.body.password || req.body.passwordConfirm)
 		return next(new AppError('This route is not for updating password', 400));
@@ -42,8 +39,6 @@ module.exports.updateDetails = catchAsync(async (req, res, next) => {
 		runValidators: true,
 	});
 
-	// we are sending the whole updatedUser,
-	// and data sent also includes properties like passwordChangedAt, __v etc
 	res.status(200).json({
 		status: 'success',
 		data: { user: updatedUser },
@@ -56,6 +51,17 @@ module.exports.updateUser = (req, res, next) => {
 		message: 'This route is not yet defined',
 	});
 };
+
+// this route is for logged in user to delete his account
+// also intended for user and not admin
+module.exports.deleteAccount = catchAsync(async (req, res, next) => {
+	await User.findByIdAndUpdate(req.user.id, { isActive: false });
+
+	res.status(204).json({
+		status: 'success',
+		data: null,
+	});
+});
 
 module.exports.deleteUser = (req, res, next) => {
 	res.status(500).json({
