@@ -4,6 +4,7 @@ const jwt = require('jsonwebtoken');
 const User = require('./../models/userModel');
 const catchAsync = require('./../utils/catchAsync');
 const AppError = require('./../utils/appError');
+const sendEmail = require('./../utils/sendEmail');
 
 const signToken = id => {
 	return jwt.sign({ id }, process.env.JWT_SECRET, {
@@ -95,22 +96,39 @@ module.exports.forgotPassword = catchAsync(async (req, res, next) => {
 
 	// 2. generate random token
 
-	// createPasswordResetToken is an instance method
-	// it sets the reset token and expiry fields on the user obj
 	const resetToken = user.createPasswordResetToken();
-
-	// we also need to save the reset token and expiry to the database
-	// as the above instance method just created fields on obj
-	// but we also need to save the reset token and expiry to db
-	// await user.save();
-
-	// the above simple save does not work do we set validation false
-	// as the user does not contain the passwordConfirm (validation fails)
-	// it contains all fields (as it is findOne from the db) but passwordConfirm is set to undefined
-	// use res.json(user) to check yourself!
 	await user.save({ validateBeforeSave: false });
 
 	// 3. send token to user's email
+	const resetURL = `${req.protocol}://${req.get(
+		'host'
+	)}/api/v1/users/reset-password/${resetToken}`;
+
+	const message = `To reset your password, send a PATCH request to:
+        ${resetURL}
+        containing your new password and passwordConfirm.
+        If you didn't forget your password, please ignore this email.`;
+
+	try {
+		await sendEmail({
+			email: user.email,
+			subject: 'Your password reset token (valid for 10 min)',
+			message,
+		});
+
+		res.status(200).json({
+			status: 'success',
+			message: 'Token sent to email!',
+		});
+	} catch (err) {
+		// we needed a new try catch block as the default error handling is not enough
+		// since we also need to reset these fields in the db below
+		user.passwordResetToken = undefined;
+		user.passwordResetExpires = undefined;
+		await user.save({ validateBeforeSave: false });
+
+		return next(new AppError('There was an error sending the email'), 500);
+	}
 });
 
 // 2. user sends the token along with new password to update passsword
