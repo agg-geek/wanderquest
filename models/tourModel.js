@@ -107,11 +107,15 @@ const tourSchema = new mongoose.Schema(
 				day: Number,
 			},
 		],
-		// we will actually store the users (guides) in tour using referencing
-		// but how this would work out using embedding is shown below
-		// EMBEDDING DEMO:
-		// we first store references (ids) of users in this array
-		guides: Array,
+		// REFERENCING
+		guides: [
+			{
+				type: mongoose.Schema.ObjectId,
+				// you haven't imported User model,
+				// you just need to mention the string User
+				ref: 'User',
+			},
+		],
 	},
 	{
 		toJSON: { virtuals: true },
@@ -125,22 +129,6 @@ tourSchema.virtual('durationWeeks').get(function () {
 
 tourSchema.pre('save', function (next) {
 	this.slug = slugify(this.name, { lower: true });
-	next();
-});
-
-// EMBEDDING DEMO:
-// we have stored the actual references (user ids) in the array
-// before saving the tour, we can retrive the users from db using user ids
-// and store it in the tour
-// this has a drawback, like if a user updates his name/email, then the user document
-// will be changed, and then you have to change it here simultaneously
-// hence we won't embed users here, we will just store the references
-tourSchema.pre('save', async function (next) {
-	// map will store the result of await User.find...
-	// since async fns always return promises, guidePromises contains promises
-	const guidesPromises = this.guides.map(async id => await User.findById(id));
-	// await the promises using Promise.all and store it back in the guide
-	this.guides = await Promise.all(guidesPromises);
 	next();
 });
 
