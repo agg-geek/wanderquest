@@ -50,6 +50,17 @@ userSchema.pre('save', async function (next) {
 	next();
 });
 
+// used to update the passwordChangedAt property when password is changed
+userSchema.pre('save', function (next) {
+	// when we are creating a new user, then password has not been modified
+	// so we don't need to set the passwordChangedAt property
+	// hence use this.isNew, this.isNew is a property on the document itself
+	if (!this.isModified('password') || this.isNew) return next();
+
+	this.passwordChangedAt = Date.now();
+	next();
+});
+
 userSchema.methods.checkPassword = async (userPwd, enteredPwd) => {
 	return await bcrypt.compare(enteredPwd, userPwd);
 };
