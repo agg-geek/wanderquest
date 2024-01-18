@@ -13,6 +13,23 @@ const signToken = id => {
 	});
 };
 
+const sendToken = (res, statusCode, userId, userData) => {
+	const token = signToken(userId);
+	const cookieOptions = {
+		// prettier-ignore
+		expires: new Date(Date.now() + process.env.JWT_COOKIE_EXPIRE_TIME * 24 * 60 * 60 * 1000),
+		httpOnly: true,
+		...(process.env.NODE_ENV === 'production' && { secure: true }),
+	};
+	res.cookie('jwt', token, cookieOptions);
+
+	res.status(statusCode).json({
+		status: 'success',
+		token,
+		...(userData && { data: userData }),
+	});
+};
+
 module.exports.signup = catchAsync(async (req, res, next) => {
 	const newUser = await User.create({
 		name: req.body.name,
@@ -22,37 +39,23 @@ module.exports.signup = catchAsync(async (req, res, next) => {
 		passwordChangedAt: req.body.passwordChangedAt,
 	});
 
-	const token = signToken(newUser._id);
-
-	const { password, ...userData } = newUser._doc;
-
-	res.status(201).json({
-		status: 'success',
-		data: { user: userData },
-		token,
-	});
+	const userData = { name: newUser.name, email: newUser.email };
+	sendToken(res, 201, newUser._id, { user: userData });
 });
 
 module.exports.login = catchAsync(async (req, res, next) => {
 	const { email, password } = req.body;
 
-	if (!email || !password) {
+	if (!email || !password)
 		return next(new AppError('Email or password is missing', 400));
-	}
 
 	const user = await User.findOne({ email }).select('+password');
 	const correctPwd = await user?.checkPassword(user.password, password);
 
-	if (!user || !correctPwd) {
+	if (!user || !correctPwd)
 		return next(new AppError('Incorrect email or password', 401));
-	}
 
-	const token = signToken(user._id);
-
-	res.json({
-		status: 'success',
-		token,
-	});
+	sendToken(res, 200, user._id);
 });
 
 module.exports.isLoggedIn = catchAsync(async (req, res, next) => {
@@ -139,11 +142,7 @@ exports.resetPassword = catchAsync(async (req, res, next) => {
 
 	await user.save();
 
-	const token = signToken(user._id);
-	res.json({
-		status: 'success',
-		token,
-	});
+	sendToken(res, 200, user._id);
 });
 
 exports.updatePassword = catchAsync(async (req, res, next) => {
@@ -160,9 +159,5 @@ exports.updatePassword = catchAsync(async (req, res, next) => {
 	user.passwordConfirm = newPwdConfirm;
 	await user.save();
 
-	const token = signToken(user._id);
-	res.status(200).json({
-		status: 'success',
-		token,
-	});
+	sendToken(res, 200, user._id);
 });

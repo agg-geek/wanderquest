@@ -52,8 +52,6 @@ module.exports.updateUser = (req, res, next) => {
 	});
 };
 
-// this route is for logged in user to delete his account
-// also intended for user and not admin
 module.exports.deleteAccount = catchAsync(async (req, res, next) => {
 	await User.findByIdAndUpdate(req.user.id, { isActive: false });
 
