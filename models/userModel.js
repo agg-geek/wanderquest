@@ -63,20 +63,10 @@ userSchema.methods.checkPasswordChange = function (jwtTimestamp) {
 
 userSchema.methods.createPasswordResetToken = function (jwtTimestamp) {
 	const resetToken = crypto.randomBytes(32).toString('hex');
-
-	// we encrypt the resetToken before storing it in db
-	// reset tokens don't need a very cryptographically secure encryption
-	// as they are less dangerous, so just use crypto package to encrypt it
 	// prettier-ignore
 	this.passwordResetToken = crypto.createHash('sha256').update(resetToken).digest('hex');
-
-	console.log({ resetToken }, this.passwordResetToken);
-
-	// expires in 10 mins
 	this.passwordResetExpires = Date.now() + 10 * 60 * 1000;
 
-	// return un-encrypted reset token to user
-	// we have stored the encrypted version in db
 	return resetToken;
 };
 

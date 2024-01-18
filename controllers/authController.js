@@ -1,5 +1,6 @@
 const { promisify } = require('util');
 const jwt = require('jsonwebtoken');
+const crypto = require('crypto');
 
 const User = require('./../models/userModel');
 const catchAsync = require('./../utils/catchAsync');
@@ -71,7 +72,6 @@ module.exports.isLoggedIn = catchAsync(async (req, res, next) => {
 		// prettier-ignore
 		return next(new AppError('Password was changed recently. Please login again.', 401));
 
-	// notice!
 	req.user = currentUser;
 	next();
 });
@@ -90,16 +90,12 @@ module.exports.authorize = (...roles) => {
 // and gets a token (not jwt)
 
 module.exports.forgotPassword = catchAsync(async (req, res, next) => {
-	// 1. Get user from received email
 	const user = await User.findOne({ email: req.body.email });
 	if (!user) return next(new AppError('User does not exist', 404));
-
-	// 2. generate random token
 
 	const resetToken = user.createPasswordResetToken();
 	await user.save({ validateBeforeSave: false });
 
-	// 3. send token to user's email
 	const resetURL = `${req.protocol}://${req.get(
 		'host'
 	)}/api/v1/users/reset-password/${resetToken}`;
@@ -121,8 +117,6 @@ module.exports.forgotPassword = catchAsync(async (req, res, next) => {
 			message: 'Token sent to email!',
 		});
 	} catch (err) {
-		// we needed a new try catch block as the default error handling is not enough
-		// since we also need to reset these fields in the db below
 		user.passwordResetToken = undefined;
 		user.passwordResetExpires = undefined;
 		await user.save({ validateBeforeSave: false });
@@ -131,4 +125,44 @@ module.exports.forgotPassword = catchAsync(async (req, res, next) => {
 	}
 });
 
-// 2. user sends the token along with new password to update passsword
+// 2. user sends the token along with new password and passwordConfirm to update passsword
+exports.resetPassword = catchAsync(async (req, res, next) => {
+	// 1) Get user based on the token
+	// we had sent the user unencrypted token and we stored the encrypted token in db
+	// so since we get the unencrypted token from user,
+	// we first encrypt it and compare it with that in db
+	// notice that we get the token from the param
+	// prettier-ignore
+	const hashedToken = crypto.createHash('sha256').update(req.params.token).digest('hex');
+
+	const user = await User.findOne({
+		passwordResetToken: hashedToken,
+		passwordResetExpires: { $gt: Date.now() },
+	});
+
+	// 2) If token has not expired, and there is user, set the new password
+	// notice that we already checked for expired token above using $gt: Date.now()
+	// so now just check for no user
+	if (!user) return next(new AppError('Token is invalid or expired', 400));
+
+	user.password = req.body.password;
+	user.passwordConfirm = req.body.passwordConfirm;
+	user.passwordResetToken = undefined;
+	user.passwordResetExpires = undefined;
+
+	// we now run save and not findOneAndUpdate because we need to run all the validators
+	// and the save middleware fns
+	// when you don't need to run the validators, you still need the save fn
+	// as you need to run the middleware
+	await user.save(); // notice we don't have the validateBeforeSave: false anymore
+
+	// 3) Update changedPasswordAt property for the user
+
+	// 4) Log the user in, send JWT
+	const token = signToken(user._id);
+
+	res.json({
+		status: 'success',
+		token,
+	});
+});
