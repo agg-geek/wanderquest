@@ -62,6 +62,13 @@ userSchema.pre('save', function (next) {
 	next();
 });
 
+// we don't show the users who have deleted their accounts
+// that is, isActive: false
+userSchema.pre(/^find/, function (next) {
+	this.find({ active: { $ne: false } });
+	next();
+});
+
 userSchema.methods.checkPassword = async (userPwd, enteredPwd) => {
 	return await bcrypt.compare(enteredPwd, userPwd);
 };
