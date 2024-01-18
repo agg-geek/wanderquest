@@ -81,33 +81,19 @@ const tourSchema = new mongoose.Schema(
 			type: Boolean,
 			default: false,
 		},
-		// start location is the start location of the tour
-		// start location is GeoJSON data
-		// to make it GeoJSON, it needs a type and coordinates
-		// this object literal here for startLocation
-		// is not a schema type obj like others
-		// it is an embedded obj itself
+		// EMBEDDING
+		// we store the complete locations data in the tour itself
+		// without creating a separate document for each location
 		startLocation: {
-			// type itself is variable whose schematype obj is mentioned
 			type: {
-				// this type String is the type of 'type' variable above
 				type: String,
 				default: 'Point',
 				enum: ['Point'],
 			},
-			// type of coordinates is an array of Number
-			// for GeoJSON, this array is [lng, lat]
 			coordinates: [Number],
 			address: String,
 			description: String,
 		},
-		// we model tours and location by embedding locations in the tour itself
-		// so each element of locations is a document in itself
-		// notice that tours.json has an ID on every locations elem
-		// which means that each location is a document, embedded into tours
-
-		// locations is an array of stops of the tour
-		// it is an array of GeoJSON elements itself
 		locations: [
 			{
 				type: {
@@ -118,10 +104,14 @@ const tourSchema = new mongoose.Schema(
 				coordinates: [Number],
 				address: String,
 				description: String,
-				// day of the tour when you reach this location
 				day: Number,
 			},
 		],
+		// we will actually store the users (guides) in tour using referencing
+		// but how this would work out using embedding is shown below
+		// EMBEDDING DEMO:
+		// we first store references (ids) of users in this array
+		guides: Array,
 	},
 	{
 		toJSON: { virtuals: true },
@@ -135,6 +125,22 @@ tourSchema.virtual('durationWeeks').get(function () {
 
 tourSchema.pre('save', function (next) {
 	this.slug = slugify(this.name, { lower: true });
+	next();
+});
+
+// EMBEDDING DEMO:
+// we have stored the actual references (user ids) in the array
+// before saving the tour, we can retrive the users from db using user ids
+// and store it in the tour
+// this has a drawback, like if a user updates his name/email, then the user document
+// will be changed, and then you have to change it here simultaneously
+// hence we won't embed users here, we will just store the references
+tourSchema.pre('save', async function (next) {
+	// map will store the result of await User.find...
+	// since async fns always return promises, guidePromises contains promises
+	const guidesPromises = this.guides.map(async id => await User.findById(id));
+	// await the promises using Promise.all and store it back in the guide
+	this.guides = await Promise.all(guidesPromises);
 	next();
 });
 
