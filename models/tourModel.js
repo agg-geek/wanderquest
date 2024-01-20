@@ -121,6 +121,21 @@ tourSchema.virtual('durationWeeks').get(function () {
 	return this.duration / 7;
 });
 
+// virtual populate
+// to find all the reviews on a tour, we can separately query
+// the reviews for a tour, but that's cubersome
+// hence we use virtual populate, where we provide an obj of options
+tourSchema.virtual('reviews', {
+	ref: 'Review',
+	// the name of the field in the other model (Review model here)
+	// where the reference to the current model is stored
+	foreignField: 'tourId',
+	// the name of the field in the current model (Tour model here)
+	// which is used as reference in the other model
+	// so the Review model stores the '_id' field of Tour model as 'tourId'
+	localField: '_id',
+});
+
 tourSchema.pre('save', function (next) {
 	this.slug = slugify(this.name, { lower: true });
 	next();
