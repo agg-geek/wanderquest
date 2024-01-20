@@ -2,7 +2,9 @@ const express = require('express');
 const reviewController = require('./../controllers/reviewController');
 const authController = require('./../controllers/authController');
 
-const router = express.Router();
+// reviewRouter gets access to tourId from tourRoutes
+// for creating review / getting all reviews
+const router = express.Router({ mergeParams: true });
 
 router
 	.route('/')

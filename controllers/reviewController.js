@@ -21,6 +21,14 @@ module.exports.getReview = catchAsync(async (req, res, next) => {
 });
 
 module.exports.createReview = catchAsync(async (req, res, next) => {
+	// Nested routes
+
+	// this fn is a POST request controller
+	// we either get the data from POST body (if we have specified it)
+	// or we get it based on the current tour and logged in user
+	if (!req.body.tourId) req.body.tourId = req.params.tourId;
+	if (!req.body.userId) req.body.userId = req.user.id;
+
 	const newReview = await Review.create(req.body);
 
 	res.status(201).json({
