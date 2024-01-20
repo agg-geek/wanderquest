@@ -26,10 +26,6 @@ router
 		tourController.deleteTour
 	);
 
-// to get all reviews for a tour / create a review for a tour
-// we have been creating reviews by manually adding the tourId and userId
-// however, a request should be of the form /api/v1/tours/1234/reviews
-// hence, get the tourId from tours/:tourId and userId from logged in user
 router.use('/:tourId/reviews', reviewRouter);
 
 module.exports = router;
