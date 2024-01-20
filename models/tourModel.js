@@ -81,9 +81,6 @@ const tourSchema = new mongoose.Schema(
 			type: Boolean,
 			default: false,
 		},
-		// EMBEDDING
-		// we store the complete locations data in the tour itself
-		// without creating a separate document for each location
 		startLocation: {
 			type: {
 				type: String,
@@ -107,12 +104,9 @@ const tourSchema = new mongoose.Schema(
 				day: Number,
 			},
 		],
-		// REFERENCING
 		guides: [
 			{
 				type: mongoose.Schema.ObjectId,
-				// you haven't imported User model,
-				// you just need to mention the string User
 				ref: 'User',
 			},
 		],

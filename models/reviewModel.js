@@ -16,10 +16,6 @@ const reviewSchema = new mongoose.Schema(
 			type: Date,
 			default: Date.now,
 		},
-		// we add parent references to tour and user
-		// so each review stores it tour and user
-		// but no tour and user stores the reviews, not even their ids
-		// this is to avoid creation of huge references array in tour and user docs
 		tourId: {
 			type: mongoose.Schema.ObjectId,
 			ref: 'Tour',
@@ -36,6 +32,15 @@ const reviewSchema = new mongoose.Schema(
 		toObject: { virtuals: true },
 	}
 );
+
+reviewSchema.pre(/^find/, function (next) {
+	// prettier-ignore
+	this
+        .populate({ path: 'tourId', select: 'name' })
+        .populate({ path: 'userId', select: 'name' });
+
+	next();
+});
 
 const Review = mongoose.model('Review', reviewSchema);
 module.exports = Review;
