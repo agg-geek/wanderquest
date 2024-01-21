@@ -52,6 +52,8 @@ const tourSchema = new mongoose.Schema(
 			default: 4,
 			min: [1, 'Rating must be atleast 1'],
 			max: [5, 'Rating must be atmost 5'],
+			// whenever a new value is set for ratingsAvg, this callback is called
+			set: val => Math.round(val * 10) / 10,
 		},
 		ratingsQuantity: {
 			type: Number,
