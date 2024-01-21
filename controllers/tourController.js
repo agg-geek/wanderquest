@@ -1,6 +1,7 @@
 const Tour = require('./../models/tourModel');
 const catchAsync = require('./../utils/catchAsync');
 const factory = require('./handlerFactory');
+const AppError = require('./../utils/appError');
 
 module.exports.getAllTours = factory.getAll(Tour);
 module.exports.getTour = factory.getOne(Tour, { path: 'reviews' });
@@ -66,5 +67,39 @@ module.exports.getMontlyPlan = catchAsync(async (req, res, next) => {
 	res.status(200).json({
 		status: 'success',
 		data: { plan },
+	});
+});
+
+module.exports.getNearbyTours = catchAsync(async (req, res, next) => {
+	const { latlng } = req.params;
+	const { distance = 10, unit = 'km' } = req.query;
+
+	if (!latlng || !latlng.includes(','))
+		return next(new AppError('Please provide lat and lng', 400));
+
+	const [lat, lng] = latlng.split(',');
+
+	// convert input distance (in km or mi) to metres
+	const maxDistance = unit === 'km' ? distance * 1000 : distance * 1609.34;
+
+	const tours = await Tour.find({
+		startLocation: {
+			$near: {
+				$geometry: {
+					type: 'Point',
+					// coordinates are of the form [lng, lat]
+					coordinates: [lng, lat],
+				},
+				// maxDistance in metres
+				$maxDistance: maxDistance,
+				$minDistance: 0,
+			},
+		},
+	});
+
+	res.status(200).json({
+		status: 'success',
+		results: tours.length,
+		data: { tours },
 	});
 });

@@ -52,7 +52,6 @@ const tourSchema = new mongoose.Schema(
 			default: 4,
 			min: [1, 'Rating must be atleast 1'],
 			max: [5, 'Rating must be atmost 5'],
-			// whenever a new value is set for ratingsAvg, this callback is called
 			set: val => Math.round(val * 10) / 10,
 		},
 		ratingsQuantity: {
@@ -120,6 +119,9 @@ const tourSchema = new mongoose.Schema(
 );
 
 tourSchema.index({ price: 1, ratingsAvg: -1 });
+
+// you need to add an index to the field on which you'll apply geospatial queries
+tourSchema.index({ startLocation: '2dsphere' });
 
 tourSchema.virtual('durationWeeks').get(function () {
 	return this.duration / 7;

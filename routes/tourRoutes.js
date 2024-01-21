@@ -14,6 +14,7 @@ router
 		authController.authorize('admin', 'lead', 'guide'),
 		tourController.getTourStats
 	);
+router.route('/nearby-tours/:latlng').get(tourController.getNearbyTours);
 
 router
 	.route('/')

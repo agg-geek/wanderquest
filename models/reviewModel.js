@@ -33,8 +33,6 @@ const reviewSchema = new mongoose.Schema(
 	}
 );
 
-// a single user cannot create multiple reviews on the same tour
-// hence, combination of tourId and userId has to be unique
 reviewSchema.index({ tourId: 1, userId: 1 }, { unique: true });
 
 reviewSchema.pre(/^find/, function (next) {
