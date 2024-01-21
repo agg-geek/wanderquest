@@ -16,6 +16,7 @@ Error handling with Express
 
 -   Authentication with JWT theory
 -   `/users/update-details` sends passwordChangedAt, \_\_v fields
+-   Update ratings stats of tour when a review is updated or deleted
 
 ## Issues
 
