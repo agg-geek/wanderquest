@@ -119,8 +119,6 @@ const tourSchema = new mongoose.Schema(
 );
 
 tourSchema.index({ price: 1, ratingsAvg: -1 });
-
-// you need to add an index to the field on which you'll apply geospatial queries
 tourSchema.index({ startLocation: '2dsphere' });
 
 tourSchema.virtual('durationWeeks').get(function () {

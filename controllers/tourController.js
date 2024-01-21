@@ -78,8 +78,6 @@ module.exports.getNearbyTours = catchAsync(async (req, res, next) => {
 		return next(new AppError('Please provide lat and lng', 400));
 
 	const [lat, lng] = latlng.split(',');
-
-	// convert input distance (in km or mi) to metres
 	const maxDistance = unit === 'km' ? distance * 1000 : distance * 1609.34;
 
 	const tours = await Tour.find({
@@ -87,10 +85,8 @@ module.exports.getNearbyTours = catchAsync(async (req, res, next) => {
 			$near: {
 				$geometry: {
 					type: 'Point',
-					// coordinates are of the form [lng, lat]
 					coordinates: [lng, lat],
 				},
-				// maxDistance in metres
 				$maxDistance: maxDistance,
 				$minDistance: 0,
 			},

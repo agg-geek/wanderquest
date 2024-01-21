@@ -17,6 +17,8 @@ Error handling with Express
 -   Authentication with JWT theory
 -   `/users/update-details` sends passwordChangedAt, \_\_v fields
 -   Update ratings stats of tour when a review is updated or deleted
+-   Implement getting the distances of all tours from a location
+-   Create documentation using Postman
 
 ## Issues
 
