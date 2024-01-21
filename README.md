@@ -20,3 +20,4 @@ Error handling with Express
 ## Issues
 
 -   Bug in errorController when error object is copied
+-   Factory fns themselves are not async fns but they return an async fn

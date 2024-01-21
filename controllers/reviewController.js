@@ -1,37 +1,25 @@
 const Review = require('./../models/reviewModel');
-const catchAsync = require('./../utils/catchAsync');
+const factory = require('./handlerFactory');
 
-module.exports.getAllReviews = catchAsync(async (req, res, next) => {
+module.exports.setIds = async (req, res, next) => {
+	// used as a middleware for create review (see reviewRoutes.js)
+	if (!req.body.tourId) req.body.tourId = req.params.tourId;
+	if (!req.body.userId) req.body.userId = req.user.id;
+	next();
+};
+
+module.exports.getAllReviews = (req, res, next) => {
+	// you can get reviews on a single tour by filtering
 	const filter = {
 		...(req.params.tourId && { tourId: req.params.tourId }),
 	};
+	// and using APIFeatures, you can further filter, sort, etc
+	// by using ?rating[lt]=4, etc
+	// hence, the APIFeatures class and factory fn comes in handy here
+	factory.getAll(Review, filter)(req, res, next);
+};
 
-	const reviews = await Review.find(filter);
-
-	res.status(200).json({
-		status: 'success',
-		results: reviews.length,
-		data: { reviews },
-	});
-});
-
-module.exports.getReview = catchAsync(async (req, res, next) => {
-	const review = await Review.findById(req.params.id);
-
-	res.status(200).json({
-		status: 'success',
-		review,
-	});
-});
-
-module.exports.createReview = catchAsync(async (req, res, next) => {
-	if (!req.body.tourId) req.body.tourId = req.params.tourId;
-	if (!req.body.userId) req.body.userId = req.user.id;
-
-	const newReview = await Review.create(req.body);
-
-	res.status(201).json({
-		status: 'success',
-		data: { review: newReview },
-	});
-});
+module.exports.getReview = factory.getOne(Review);
+module.exports.createReview = factory.createOne(Review);
+module.exports.updateReview = factory.updateOne(Review);
+module.exports.deleteReview = factory.deleteOne(Review);
