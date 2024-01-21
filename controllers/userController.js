@@ -15,6 +15,11 @@ module.exports.createUser = (req, res, next) => {
 	});
 };
 
+module.exports.getUserDetails = (req, res, next) => {
+	req.params.id = req.user.id;
+	next();
+};
+
 module.exports.updateDetails = catchAsync(async (req, res, next) => {
 	if (req.body.password || req.body.passwordConfirm)
 		return next(new AppError('This route is not for updating password', 400));

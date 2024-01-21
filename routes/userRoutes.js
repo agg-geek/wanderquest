@@ -4,6 +4,13 @@ const authController = require('./../controllers/authController');
 
 const router = express.Router();
 
+router.get(
+	'/my-account',
+	authController.isLoggedIn,
+	userController.getUserDetails,
+	userController.getUser
+);
+
 router.post('/signup', authController.signup);
 router.post('/login', authController.login);
 
@@ -13,10 +20,11 @@ router.patch(
 	authController.isLoggedIn,
 	authController.updatePassword
 );
-router.delete('/delete-account', authController.isLoggedIn, userController.deleteAccount);
 
 router.post('/forgot-password', authController.forgotPassword);
 router.patch('/reset-password/:token', authController.resetPassword);
+
+router.delete('/delete-account', authController.isLoggedIn, userController.deleteAccount);
 
 router.route('/').get(userController.getAllUsers).post(userController.createUser);
 
