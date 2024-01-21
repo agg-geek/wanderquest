@@ -117,19 +117,6 @@ const tourSchema = new mongoose.Schema(
 	}
 );
 
-// if you create a field, then .explain()
-// will have nReturned < totalDocsExamined in executionStats
-// when getAllTours with price[lt]<1000 is queried
-// create indexes for the most searched queries
-// index will be updated whenever any document is changed for that index field
-// hence, indexes for write heavy data might not be useful
-
-// this is a single-field index
-// tourSchema.index({ price: 1 });
-
-// this is a compound index
-// you can erase the single-field index for price
-// as this compound index containing price already exists
 tourSchema.index({ price: 1, ratingsAvg: -1 });
 
 tourSchema.virtual('durationWeeks').get(function () {

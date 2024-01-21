@@ -13,6 +13,7 @@ mongoose
 const users = JSON.parse(fs.readFileSync(`${__dirname}/data/users.json`, 'utf-8'));
 
 const cnt = {
+	admin: 1,
 	lead: 1,
 	guide: 1,
 	user: 1,
