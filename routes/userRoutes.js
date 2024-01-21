@@ -4,30 +4,23 @@ const authController = require('./../controllers/authController');
 
 const router = express.Router();
 
-router.get(
-	'/my-account',
-	authController.isLoggedIn,
-	userController.getUserDetails,
-	userController.getUser
-);
-
 router.post('/signup', authController.signup);
 router.post('/login', authController.login);
-
-router.patch('/update-details', authController.isLoggedIn, userController.updateDetails);
-router.patch(
-	'/update-password',
-	authController.isLoggedIn,
-	authController.updatePassword
-);
-
 router.post('/forgot-password', authController.forgotPassword);
 router.patch('/reset-password/:token', authController.resetPassword);
 
-router.delete('/delete-account', authController.isLoggedIn, userController.deleteAccount);
+// run isLoggedIn middleware for all the routes below
+router.use(authController.isLoggedIn);
+
+router.get('/my-account', userController.getUserDetails, userController.getUser);
+router.patch('/update-details', userController.updateDetails);
+router.patch('/update-password', authController.updatePassword);
+router.delete('/delete-account', userController.deleteAccount);
+
+// routes only for admins
+router.use(authController.authorize('admin'));
 
 router.route('/').get(userController.getAllUsers).post(userController.createUser);
-
 router
 	.route('/:id')
 	.get(userController.getUser)

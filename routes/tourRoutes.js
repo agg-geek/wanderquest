@@ -5,24 +5,36 @@ const reviewRouter = require('./reviewRoutes');
 
 const router = express.Router();
 
+router.route('/top-5-tours').get(tourController.topTours, tourController.getAllTours);
+router.route('/annual-plan/:year').get(tourController.getMontlyPlan);
+router
+	.route('/tour-stats')
+	.get(
+		authController.isLoggedIn,
+		authController.authorize('admin', 'lead', 'guide'),
+		tourController.getTourStats
+	);
+
 router
 	.route('/')
-	.get(authController.isLoggedIn, tourController.getAllTours)
-	.post(tourController.createTour);
-
-router.route('/top-5-tours').get(tourController.topTours, tourController.getAllTours);
-
-router.route('/tour-stats').get(tourController.getTourStats);
-
-router.route('/monthly-plan/:year').get(tourController.getMontlyPlan);
+	.get(tourController.getAllTours)
+	.post(
+		authController.isLoggedIn,
+		authController.authorize('admin', 'lead'),
+		tourController.createTour
+	);
 
 router
 	.route('/:id')
 	.get(tourController.getTour)
-	.patch(tourController.updateTour)
+	.patch(
+		authController.isLoggedIn,
+		authController.authorize('admin', 'lead'),
+		tourController.updateTour
+	)
 	.delete(
 		authController.isLoggedIn,
-		authController.authorize('lead', 'admin'),
+		authController.authorize('admin', 'lead'),
 		tourController.deleteTour
 	);
 
