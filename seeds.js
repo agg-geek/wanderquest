@@ -4,6 +4,8 @@ const dotenv = require('dotenv');
 dotenv.config({ path: './config.env' });
 
 const Tour = require('./models/tourModel');
+const User = require('./models/userModel');
+const Review = require('./models/reviewModel');
 
 mongoose
 	.connect(process.env.DATABASE_URL)
@@ -13,26 +15,36 @@ mongoose
 const tours = JSON.parse(
 	fs.readFileSync(`${__dirname}/dev-files/data/tours.json`, 'utf-8')
 );
+const users = JSON.parse(
+	fs.readFileSync(`${__dirname}/dev-files/data/users.json`, 'utf-8')
+);
+const reviews = JSON.parse(
+	fs.readFileSync(`${__dirname}/dev-files/data/reviews.json`, 'utf-8')
+);
 
-const deleteTours = async () => {
+const deleteData = async () => {
 	try {
 		await Tour.deleteMany();
-		console.log('Tours successfully deleted');
+		await User.deleteMany();
+		await Review.deleteMany();
+		console.log('Data successfully deleted');
 	} catch (err) {
 		console.log(err);
 	}
 	process.exit();
 };
 
-const importTours = async () => {
+const importData = async () => {
 	try {
 		await Tour.create(tours);
-		console.log('Tours successfully saved');
+		await User.create(users);
+		await Review.create(reviews);
+		console.log('Data successfully saved');
 	} catch (err) {
 		console.log(err);
 	}
 	process.exit();
 };
 
-if (process.argv[2] === '--importT') importTours();
-else if (process.argv[2] === '--deleteT') deleteTours();
+if (process.argv[2] === '--import') importData();
+else if (process.argv[2] === '--delete') deleteData();
