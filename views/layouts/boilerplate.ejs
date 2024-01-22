@@ -11,9 +11,11 @@
 		<link rel="shortcut icon" type="image/png" href="img/favicon.png" />
 		<link rel="stylesheet" href="css/style.css" />
 
-		<title>Natours</title>
+		<title>Natours | <%= title %></title>
 	</head>
 	<body>
-		<%- include('../partials/header') %> <%- include('../partials/footer') %>
+		<%- include('../partials/header') %> 
+        <%- body %>
+        <%- include('../partials/footer') %>
 	</body>
 </html>

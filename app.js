@@ -6,6 +6,7 @@ const helmet = require('helmet');
 const mongoSanitize = require('express-mongo-sanitize');
 const xssClean = require('xss-clean');
 const hpp = require('hpp');
+const ejsMate = require('ejs-mate');
 
 const AppError = require('./utils/appError');
 const errorHandler = require('./controllers/errorController');
@@ -18,6 +19,7 @@ const app = express();
 
 app.use(helmet());
 
+app.engine('ejs', ejsMate);
 app.set('view engine', 'ejs');
 app.set('views', path.join(__dirname, 'views'));
 app.use(express.static(path.join(__dirname, 'public')));
