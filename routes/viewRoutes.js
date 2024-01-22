@@ -10,4 +10,6 @@ router.get('/', (req, res) => {
 router.get('/tours', viewController.getAllTours);
 router.get('/tours/:tourSlug', viewController.getTour);
 
+router.get('/login', viewController.getLoginForm);
+
 module.exports = router;
