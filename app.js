@@ -16,7 +16,7 @@ const viewRouter = require('./routes/viewRoutes');
 
 const app = express();
 
-app.use(helmet());
+app.use(helmet({ contentSecurityPolicy: false }));
 
 app.set('view engine', 'ejs');
 app.set('views', path.join(__dirname, 'views'));

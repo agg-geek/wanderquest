@@ -2,6 +2,9 @@
 <html lang="en">
 <head>
     <%- include('../partials/head') %>
+
+    <script src='https://api.mapbox.com/mapbox-gl-js/v2.9.1/mapbox-gl.js'></script>
+    <link href='https://api.mapbox.com/mapbox-gl-js/v2.9.1/mapbox-gl.css' rel='stylesheet' />
 </head>
 <body>
     <%- include('../partials/header') %>
@@ -95,7 +98,7 @@
         <% }) %>
     </section>
     <section class="section-map">
-        <div id="map"></div>
+        <div id="map" data-locations="<%= JSON.stringify(tour.locations) %>"></div>
     </section>
     <section class="section-reviews">
         <div class="reviews">
@@ -139,5 +142,9 @@
     </section>
 
     <%- include('../partials/footer') %>
+
+    <!-- used to define the mapbox key used by mapbox.js -->
+    <script>const mapboxKey = '<%= mapboxAccessToken %>'</script>
+    <script src="/js/mapbox.js"></script>
 </body>
 </html>
