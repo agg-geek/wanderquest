@@ -8,3 +8,13 @@ module.exports.getAllTours = catchAsync(async (req, res, next) => {
 		tours,
 	});
 });
+
+module.exports.getTour = catchAsync(async (req, res, next) => {
+	const tour = await Tour.findOne({ slug: req.params.tourSlug }).populate('reviews');
+
+	// res.status(200).json({ tour });
+	res.status(200).render('tours/show', {
+		title: tour.name,
+		tour,
+	});
+});

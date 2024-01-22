@@ -8,5 +8,6 @@ router.get('/', (req, res) => {
 });
 
 router.get('/tours', viewController.getAllTours);
+router.get('/tours/:tourSlug', viewController.getTour);
 
 module.exports = router;
