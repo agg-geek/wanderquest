@@ -13,10 +13,5 @@ router.get('/tours/:tourSlug', authController.addUserLocal, viewController.rende
 
 router.get('/login', authController.addUserLocal, viewController.renderLoginForm);
 router.get('/my-account', authController.isLoggedIn, viewController.renderAccountPage);
-router.post(
-	'/update-user-details',
-	authController.isLoggedIn,
-	viewController.updateUserDetails
-);
 
 module.exports = router;

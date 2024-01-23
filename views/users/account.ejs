@@ -31,7 +31,7 @@
             <div class="user-view__content">
                 <div class="user-view__form-container">
                     <h2 class="heading-secondary ma-bt-md">Your account settings</h2>
-                    <form class="form form-user-data" action="/update-user-details" method="POST">
+                    <form class="form form-user-data">
                         <div class="form__group">
                             <label class="form__label" for="name">Name</label>
                             <input
@@ -39,7 +39,6 @@
                                 id="name"
                                 type="text"
                                 value="<%= user.name %>"
-                                name="name"
                                 required="required"
                             />
                         </div>
@@ -50,7 +49,6 @@
                                 id="email"
                                 type="email"
                                 value="<%= user.email %>"
-                                name="email"
                                 required="required"
                             />
                         </div>
