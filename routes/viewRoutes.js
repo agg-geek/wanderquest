@@ -14,5 +14,6 @@ router.get('/tours', viewController.renderAllTours);
 router.get('/tours/:tourSlug', viewController.renderTour);
 
 router.get('/login', viewController.renderLoginForm);
+router.get('/my-account', authController.isLoggedIn, viewController.renderAccountPage);
 
 module.exports = router;

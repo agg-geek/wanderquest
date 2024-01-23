@@ -10,11 +10,8 @@ module.exports.renderAllTours = catchAsync(async (req, res, next) => {
 	});
 });
 
-// go to tours/non-existent-tour and you get an error
 module.exports.renderTour = catchAsync(async (req, res, next) => {
 	const tour = await Tour.findOne({ slug: req.params.tourSlug }).populate('reviews');
-
-	// error will be passed to global error handling middleware
 	if (!tour) return next(new AppError('Tour not found', 404));
 
 	res.status(200).render('tours/show', {
@@ -26,4 +23,8 @@ module.exports.renderTour = catchAsync(async (req, res, next) => {
 
 module.exports.renderLoginForm = (req, res) => {
 	res.status(200).render('users/login', { title: 'Login' });
+};
+
+module.exports.renderAccountPage = (req, res) => {
+	res.status(200).render('users/account', { title: 'My account' });
 };

@@ -16,7 +16,7 @@
 	<nav class="nav nav--user">
         <% if (locals.user) { %>
             <a href="#" class="nav__el nav__el--logout">Logout</a>
-            <a href="#" class="nav__el">
+            <a href="/my-account" class="nav__el">
                 <img src="/img/users/<%= user.photo %>" alt="<%= user.name %> photo" class="nav__user-img" />
                 <span><%= user.name.split(' ')[0] %></span>
             </a>

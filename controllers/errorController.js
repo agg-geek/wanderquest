@@ -25,9 +25,6 @@ const handleJWTExpiredError = () =>
 	new AppError('Token expired. Please login again.', 401);
 
 const sendDevError = (err, res, req) => {
-	// originalUrl for 127.0.0.1:3000/api/v1/ is /api/v1
-	// if the error encountered is in the API, then send appropriate JSON
-
 	if (req.originalUrl.startsWith('/api')) {
 		res.status(err.statusCode).json({
 			status: err.status,
@@ -36,8 +33,6 @@ const sendDevError = (err, res, req) => {
 			error: err,
 		});
 	} else {
-		// from the frontend, if you request a tour which does not exist,
-		// then you will be at /tours/<random-tour> which does not start with /api
 		console.log(err);
 		res.status(err.statusCode).render('error', {
 			title: 'Error',
