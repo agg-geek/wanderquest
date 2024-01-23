@@ -88,22 +88,6 @@ module.exports.isLoggedIn = catchAsync(async (req, res, next) => {
 	next();
 });
 
-module.exports.addUserLocal = async (req, res, next) => {
-	try {
-		const token = req.cookies.jwt;
-		if (!token) return next();
-		const payload = await promisify(jwt.verify)(token, process.env.JWT_SECRET);
-		const currentUser = await User.findById(payload.id);
-		if (!currentUser) return next();
-		if (currentUser.checkPasswordChange(payload.iat)) return next();
-
-		res.locals.user = currentUser;
-		next();
-	} catch (err) {
-		next();
-	}
-};
-
 module.exports.authorize = (...roles) => {
 	return (req, res, next) => {
 		if (!roles.includes(req.user.role))

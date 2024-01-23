@@ -1,6 +1,28 @@
+const { promisify } = require('util');
+const jwt = require('jsonwebtoken');
+
 const Tour = require('./../models/tourModel');
+const User = require('./../models/userModel');
 const catchAsync = require('./../utils/catchAsync');
 const AppError = require('./../utils/appError');
+
+module.exports.addUserLocal = async (req, res, next) => {
+	try {
+		const token = req.cookies.jwt;
+		if (!token) return next();
+		const payload = await promisify(jwt.verify)(token, process.env.JWT_SECRET);
+		const currentUser = await User.findById(payload.id);
+		if (!currentUser) return next();
+		if (currentUser.checkPasswordChange(payload.iat)) return next();
+
+		res.locals.user = currentUser;
+		next();
+	} catch (err) {
+		console.log(err);
+
+		next();
+	}
+};
 
 module.exports.renderAllTours = catchAsync(async (req, res, next) => {
 	const tours = await Tour.find();
