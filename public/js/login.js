@@ -1,4 +1,5 @@
 import axios from 'axios';
+import { showAlert } from './alerts';
 
 export const login = async (email, password) => {
 	try {
@@ -8,10 +9,10 @@ export const login = async (email, password) => {
 			data: { email, password },
 		});
 		if (res.data.status === 'success') {
-			alert('Login successful');
+			showAlert('success', 'Login successful');
 			window.setTimeout(() => location.assign('/tours'), 1000);
 		}
 	} catch (err) {
-		alert(err.response.data.message);
+		showAlert('error', err.response.data.message);
 	}
 };
