@@ -60,8 +60,13 @@ module.exports.login = catchAsync(async (req, res, next) => {
 
 module.exports.isLoggedIn = catchAsync(async (req, res, next) => {
 	let token;
-	if (req.headers.authorization?.startsWith('Bearer'))
+	if (req.headers.authorization?.startsWith('Bearer')) {
 		token = req.headers.authorization.split(' ')[1];
+	} else if (req.cookies.jwt) {
+		// cookieParser is need to parse req.cookies
+		// just like express.json() is reqd to parse req.body
+		token = req.cookies.jwt;
+	}
 
 	if (!token) return next(new AppError('Please login to view', 401));
 
