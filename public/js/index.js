@@ -8,6 +8,7 @@ const mapBox = document.querySelector('#map');
 const loginForm = document.querySelector('.form-login');
 const logoutBtn = document.querySelector('.nav__el--logout');
 const updateUserDetailsForm = document.querySelector('.form-user-data');
+const updatePasswordForm = document.querySelector('.form-user-password');
 
 if (mapBox) {
 	const locations = JSON.parse(mapBox.dataset.locations);
@@ -32,6 +33,24 @@ if (updateUserDetailsForm) {
 
 		const name = document.querySelector('#name').value;
 		const email = document.querySelector('#email').value;
-		updateUserDetails(name, email);
+		updateUserDetails({ name, email });
+	});
+}
+
+if (updatePasswordForm) {
+	updatePasswordForm.addEventListener('submit', async evt => {
+		evt.preventDefault();
+
+		document.querySelector('.btn--save-password').textContent = 'Updating...';
+
+		const currentPwd = document.querySelector('#password-current').value;
+		const newPwd = document.querySelector('#password').value;
+		const newPwdConfirm = document.querySelector('#password-confirm').value;
+		await updateUserDetails({ currentPwd, newPwd, newPwdConfirm }, 'password');
+
+		document.querySelector('.btn--save-password').textContent = 'Password updated!';
+		document.querySelector('#password-current').value = '';
+		document.querySelector('#password').value = '';
+		document.querySelector('#password-confirm').value = '';
 	});
 }
