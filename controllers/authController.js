@@ -84,6 +84,7 @@ module.exports.isLoggedIn = catchAsync(async (req, res, next) => {
 		return next(new AppError('Password was changed recently. Please login again.', 401));
 
 	req.user = currentUser;
+	res.locals.user = currentUser;
 	next();
 });
 
