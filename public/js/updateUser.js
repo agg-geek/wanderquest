@@ -1,7 +1,6 @@
 import axios from 'axios';
 import { showAlert } from './alerts';
 
-// type can be details or password
 export const updateUserDetails = async (data, type = 'details') => {
 	try {
 		const res = await axios({
