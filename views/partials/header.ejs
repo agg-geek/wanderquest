@@ -14,16 +14,12 @@
 		<img src="/img/logo-white.png" alt="Natours logo" />
 	</div>
 	<nav class="nav nav--user">
-        <!-- if user is not defined, then using <%# if (user) { %> throws an error that user is not defined -->
-        <!-- this is counter-intuitive, but anyways, use locals.user -->
         <% if (locals.user) { %>
             <a href="#" class="nav__el nav__el--logout">Logout</a>
             <a href="#" class="nav__el">
                 <img src="/img/users/<%= user.photo %>" alt="<%= user.name %> photo" class="nav__user-img" />
                 <span><%= user.name.split(' ')[0] %></span>
             </a>
-        <!-- also, for if else blocks, the ending } of if should be on the same line with else -->
-        <!-- that is, <%# } else { %> -->
         <% } else { %>
             <a class="nav__el" href="/login">Log in</a>
             <a class="nav__el nav__el--cta">Sign up</a>

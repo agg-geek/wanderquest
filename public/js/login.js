@@ -5,9 +5,14 @@ const login = async (email, password) => {
 			url: 'http://127.0.0.1:3000/api/v1/users/login',
 			data: { email, password },
 		});
-		console.log(res.data);
+		// res.data is the data we send from our API if request is successful
+		if (res.data.status === 'success') {
+			alert('Login successful');
+			// on successful login, redirect to /tours
+			window.setTimeout(() => location.assign('/tours'), 1000);
+		}
 	} catch (err) {
-		console.log(err.response.data);
+		alert(err.response.data.message);
 	}
 };
 

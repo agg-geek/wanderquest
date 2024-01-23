@@ -82,16 +82,8 @@ module.exports.isLoggedIn = catchAsync(async (req, res, next) => {
 	next();
 });
 
-// this fn is copy of isLoggedIn middleware
-// here, we just want to pass the user info to views using res.locals.user
-// if the user is not logged in, then user local won't be set
-// we don't want to throw any error, we just want to set the user local
 module.exports.addUserLocal = async (req, res, next) => {
-	// if there was any error, you won't set the res.locals.user property
-	// we just go to the next middleware without raising any error
-	// and the user local will not be set
 	try {
-		// take the token only from cookies, not even the authorization header
 		const token = req.cookies.jwt;
 		if (!token) return next();
 		const payload = await promisify(jwt.verify)(token, process.env.JWT_SECRET);
@@ -99,7 +91,6 @@ module.exports.addUserLocal = async (req, res, next) => {
 		if (!currentUser) return next();
 		if (currentUser.checkPasswordChange(payload.iat)) return next();
 
-		// locals can be accessed by the views
 		res.locals.user = currentUser;
 		next();
 	} catch (err) {
