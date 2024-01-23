@@ -10,9 +10,9 @@ router.get('/', (req, res) => {
 
 router.use(authController.addUserLocal);
 
-router.get('/tours', viewController.getAllTours);
-router.get('/tours/:tourSlug', viewController.getTour);
+router.get('/tours', viewController.renderAllTours);
+router.get('/tours/:tourSlug', viewController.renderTour);
 
-router.get('/login', viewController.getLoginForm);
+router.get('/login', viewController.renderLoginForm);
 
 module.exports = router;

@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <%- include('partials/head') %>
+</head>
+<body>
+    <%- include('partials/header') %>
+
+    <main class="main">
+        <div class="error">
+            <div class="error__title">
+                <h2 class="heading-secondary heading-secondary--error">
+                    An error encountered!
+                </h2>
+            </div>
+            <div class="error__msg"><%= errmsg %></div>
+        </div>
+    </main>
+
+    <%- include('partials/footer') %>
+</body>
+</html>
+

@@ -24,27 +24,55 @@ const handleJWTInvalidSignature = () =>
 const handleJWTExpiredError = () =>
 	new AppError('Token expired. Please login again.', 401);
 
-const sendDevError = (err, res) => {
-	res.status(err.statusCode).json({
-		status: err.status,
-		message: err.message,
-		stack: err.stack,
-		error: err,
-	});
-};
+const sendDevError = (err, res, req) => {
+	// originalUrl for 127.0.0.1:3000/api/v1/ is /api/v1
+	// if the error encountered is in the API, then send appropriate JSON
 
-const sendProdError = (err, res) => {
-	if (err.isOperational) {
+	if (req.originalUrl.startsWith('/api')) {
 		res.status(err.statusCode).json({
 			status: err.status,
 			message: err.message,
+			stack: err.stack,
+			error: err,
 		});
 	} else {
-		console.error(err);
-		res.status(err.statusCode).json({
-			status: '500',
-			message: 'Something went wrong',
+		// from the frontend, if you request a tour which does not exist,
+		// then you will be at /tours/<random-tour> which does not start with /api
+		console.log(err);
+		res.status(err.statusCode).render('error', {
+			title: 'Error',
+			errmsg: err.message,
 		});
+	}
+};
+
+const sendProdError = (err, res, req) => {
+	if (req.originalUrl.startsWith('/api')) {
+		if (err.isOperational) {
+			res.status(err.statusCode).json({
+				status: err.status,
+				message: err.message,
+			});
+		} else {
+			console.error(err);
+			res.status(err.statusCode).json({
+				status: '500',
+				message: 'Something went wrong',
+			});
+		}
+	} else {
+		console.error(err);
+		if (err.isOperational) {
+			res.status(err.statusCode).render('error', {
+				title: 'Error',
+				errmsg: err.message,
+			});
+		} else {
+			res.status(err.statusCode).render('error', {
+				title: 'Error',
+				errmsg: 'Something went wrong',
+			});
+		}
 	}
 };
 
@@ -53,13 +81,13 @@ module.exports = (err, req, res, next) => {
 	err.status = err.status || 'error';
 
 	if (process.env.NODE_ENV === 'development') {
-		sendDevError(err, res);
+		sendDevError(err, res, req);
 	} else {
 		if (err.name === 'CastError') err = handleDBCastError(err);
 		if (err.code === 11000) err = handleDBDuplicateError(err);
 		if (err.name === 'ValidationError') err = handleDBValidationError(err);
 		if (err.name === 'JsonWebTokenError') err = handleJWTInvalidSignature();
 		if (err.name === 'TokenExpiredError') err = handleJWTExpiredError();
-		sendProdError(err, res);
+		sendProdError(err, res, req);
 	}
 };

@@ -25,13 +25,9 @@ export const logout = async () => {
 		});
 		if (res.data.status === 'success') {
 			showAlert('success', 'Logged out successfully');
-			// true: reload page from server and not cache
-			// otherwise from cache, the old user menu when logged in will still show
-			// location.reload(true);
 			window.setTimeout(() => location.assign('/tours'), 1000);
 		}
 	} catch (err) {
-		// perhaps only happens when there is no internet connection
 		showAlert('error', 'Cannot logout');
 	}
 };

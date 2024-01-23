@@ -87,9 +87,6 @@ module.exports.isLoggedIn = catchAsync(async (req, res, next) => {
 	next();
 });
 
-// also notice that there is no catchAsync here
-// because we do not want to pass any errors for error handling
-// notice that instead of catchAsync, we have our own custom try catch block here
 module.exports.addUserLocal = async (req, res, next) => {
 	try {
 		const token = req.cookies.jwt;
