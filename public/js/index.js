@@ -1,18 +1,17 @@
 import '@babel/polyfill';
 
 import { displayMap } from './mapbox';
-import { login } from './login';
+import { login, logout } from './auth';
 
 const mapBox = document.querySelector('#map');
 const loginForm = document.querySelector('.form');
+const logoutBtn = document.querySelector('.nav__el--logout');
 
-// only show.ejs contains mapBox, so displayMap only if #map exists
 if (mapBox) {
 	const locations = JSON.parse(mapBox.dataset.locations);
 	displayMap(locations);
 }
 
-// do this only for the login page
 if (loginForm) {
 	loginForm.addEventListener('submit', evt => {
 		evt.preventDefault();
@@ -22,3 +21,5 @@ if (loginForm) {
 		login(email, password);
 	});
 }
+
+if (logoutBtn) logoutBtn.addEventListener('click', logout);

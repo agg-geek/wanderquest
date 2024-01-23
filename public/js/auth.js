@@ -1,0 +1,37 @@
+import axios from 'axios';
+import { showAlert } from './alerts';
+
+export const login = async (email, password) => {
+	try {
+		const res = await axios({
+			method: 'POST',
+			url: 'http://127.0.0.1:3000/api/v1/users/login',
+			data: { email, password },
+		});
+		if (res.data.status === 'success') {
+			showAlert('success', 'Login successful');
+			window.setTimeout(() => location.assign('/tours'), 1000);
+		}
+	} catch (err) {
+		showAlert('error', err.response.data.message);
+	}
+};
+
+export const logout = async () => {
+	try {
+		const res = await axios({
+			method: 'GET',
+			url: 'http://127.0.0.1:3000/api/v1/users/logout',
+		});
+		if (res.data.status === 'success') {
+			showAlert('success', 'Logged out successfully');
+			// true: reload page from server and not cache
+			// otherwise from cache, the old user menu when logged in will still show
+			// location.reload(true);
+			window.setTimeout(() => location.assign('/tours'), 1000);
+		}
+	} catch (err) {
+		// perhaps only happens when there is no internet connection
+		showAlert('error', 'Cannot logout');
+	}
+};
