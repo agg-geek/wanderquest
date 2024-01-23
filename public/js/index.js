@@ -4,7 +4,7 @@ import { displayMap } from './mapbox';
 import { login, logout } from './auth';
 
 const mapBox = document.querySelector('#map');
-const loginForm = document.querySelector('.form');
+const loginForm = document.querySelector('.form-login');
 const logoutBtn = document.querySelector('.nav__el--logout');
 
 if (mapBox) {
