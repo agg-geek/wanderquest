@@ -13,7 +13,11 @@ router.patch('/reset-password/:token', authController.resetPassword);
 router.use(authController.isLoggedIn);
 
 router.get('/my-account', userController.getUserDetails, userController.getUser);
-router.patch('/update-details', userController.updateDetails);
+router.patch(
+	'/update-details',
+	userController.uploadUserPhoto,
+	userController.updateDetails
+);
 router.patch('/update-password', authController.updatePassword);
 router.delete('/delete-account', userController.deleteAccount);
 

@@ -18,8 +18,6 @@ module.exports.addUserLocal = async (req, res, next) => {
 		res.locals.user = currentUser;
 		next();
 	} catch (err) {
-		console.log(err);
-
 		next();
 	}
 };
