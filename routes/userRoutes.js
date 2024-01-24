@@ -16,6 +16,7 @@ router.get('/my-account', userController.getUserDetails, userController.getUser)
 router.patch(
 	'/update-details',
 	userController.uploadUserPhoto,
+	userController.resizeUserPhoto,
 	userController.updateDetails
 );
 router.patch('/update-password', authController.updatePassword);

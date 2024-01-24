@@ -1,19 +1,14 @@
 const multer = require('multer');
+const sharp = require('sharp');
 
 const User = require('./../models/userModel');
 const catchAsync = require('../utils/catchAsync');
 const AppError = require('./../utils/appError');
 const factory = require('./handlerFactory');
 
-const multerStorage = multer.diskStorage({
-	destination: (req, file, cb) => {
-		cb(null, 'public/img/users');
-	},
-	filename: (req, file, cb) => {
-		const ext = file.mimetype.split('/')[1];
-		cb(null, `user-${req.user.id}-${Date.now()}.${ext}`);
-	},
-});
+// since we are resizing the file, don't store the uploaded file
+// first we resize it and then store it
+const multerStorage = multer.memoryStorage();
 
 const multerFilter = (req, file, cb) => {
 	if (file.mimetype.startsWith('image')) {
@@ -45,6 +40,25 @@ module.exports.getUserDetails = (req, res, next) => {
 	next();
 };
 
+module.exports.uploadUserPhoto = upload.single('photo');
+
+module.exports.resizeUserPhoto = catchAsync(async (req, res, next) => {
+	if (!req.file) return next();
+
+	// image stored in memory will not have the filename property set
+	// hence set it, as it is used by uploadDetails to store the image reference in db
+	req.file.filename = `user-${req.user.id}-${Date.now()}.jpeg`;
+
+	// the image stored in memory is available at req.file.buffer
+	await sharp(req.file.buffer)
+		.resize(500, 500)
+		.toFormat('jpeg')
+		.jpeg({ quality: 90 })
+		.toFile(`public/img/users/${req.file.filename}`);
+
+	next();
+});
+
 module.exports.updateDetails = catchAsync(async (req, res, next) => {
 	if (req.body.password || req.body.passwordConfirm)
 		return next(new AppError('This route is not for updating password', 400));
@@ -64,8 +78,6 @@ module.exports.updateDetails = catchAsync(async (req, res, next) => {
 		data: { user: updatedUser },
 	});
 });
-
-module.exports.uploadUserPhoto = upload.single('photo');
 
 module.exports.deleteAccount = catchAsync(async (req, res, next) => {
 	await User.findByIdAndUpdate(req.user.id, { isActive: false });
