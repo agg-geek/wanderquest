@@ -7,6 +7,7 @@ const mongoSanitize = require('express-mongo-sanitize');
 const xssClean = require('xss-clean');
 const hpp = require('hpp');
 const cookieParser = require('cookie-parser');
+const ejsMate = require('ejs-mate');
 
 const AppError = require('./utils/appError');
 const errorHandler = require('./controllers/errorController');
@@ -20,6 +21,7 @@ const app = express();
 app.use(helmet({ contentSecurityPolicy: false }));
 
 app.set('view engine', 'ejs');
+app.engine('ejs', ejsMate);
 app.set('views', path.join(__dirname, 'views'));
 app.use(express.static(path.join(__dirname, 'public')));
 

@@ -21,22 +21,14 @@ const upload = multer({
 	fileFilter: multerFilter,
 });
 
-// to update a single field with multiple files
-// use upload.array('images', 5)
 module.exports.uploadTourImages = upload.fields([
 	{ name: 'imageCover', maxCount: 1 },
 	{ name: 'images', maxCount: 3 },
 ]);
 
 module.exports.resizeTourImages = catchAsync(async (req, res, next) => {
-	// files will be stored in req.files (upload.single has req.file)
-	console.log(req.files);
-
-	// notice the ||, you need to specify both imageCover and images
 	if (!req.files.imageCover || !req.files.images) return next();
 
-	// notice you specify the imageCover on req.body
-	// as updateTour will update the tour using data from req.body
 	req.body.imageCover = `tour-${req.params.id}-${Date.now()}-cover.jpeg`;
 	await sharp(req.files.imageCover[0].buffer)
 		.resize(2000, 1333)
@@ -45,12 +37,6 @@ module.exports.resizeTourImages = catchAsync(async (req, res, next) => {
 		.toFile(`public/img/tours/${req.body.imageCover}`);
 
 	req.body.images = [];
-
-	// you could have used req.files.images.forEach(async (file, i) => {})
-	// but then, since forEach is not async, we would directly go to next()
-	// without having pushed filenames into req.body.images[]
-	// hence you map over the images, store the promises and then await them
-	// using Promise.all()
 
 	req.body.images = [];
 	await Promise.all(
