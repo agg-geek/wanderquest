@@ -57,7 +57,9 @@
                                 class="form__user-photo"
                                 src="img/users/<%= user.photo %>"
                                 alt="User photo"
-                            /><a class="btn-text" href="">Choose new photo</a>
+                            />
+                            <input id="photo" class="form__upload" name="photo" type="file" accept="image/*">
+                            <label for="photo">Choose new photo</label>
                         </div>
                         <div class="form__group right">
                             <button class="btn btn--small btn--green">Save settings</button>
