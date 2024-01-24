@@ -26,11 +26,12 @@ class Email {
 		});
 	}
 
-	async send(template, subject) {
-		const html = ejs.render(`${__dirname}/../views/email/${template}.ejs`, {
+	async send(type, subject) {
+		const html = await ejs.renderFile(`${__dirname}/../views/email.ejs`, {
 			firstName: this.firstName,
 			url: this.url,
 			subject,
+			type,
 		});
 
 		const mailOptions = {
@@ -38,7 +39,7 @@ class Email {
 			to: this.to,
 			subject,
 			html,
-			text: htmlToText.fromString(html),
+			text: htmlToText.htmlToText(html),
 		};
 
 		await this._newTransport().sendMail(mailOptions);
@@ -49,10 +50,7 @@ class Email {
 	}
 
 	async sendPasswordReset() {
-		await this.send(
-			'passwordReset',
-			'Your password reset token (valid for only 10 minutes)'
-		);
+		await this.send('passwordReset', 'Your password reset token');
 	}
 }
 
