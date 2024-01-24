@@ -6,8 +6,6 @@ const catchAsync = require('../utils/catchAsync');
 const AppError = require('./../utils/appError');
 const factory = require('./handlerFactory');
 
-// since we are resizing the file, don't store the uploaded file
-// first we resize it and then store it
 const multerStorage = multer.memoryStorage();
 
 const multerFilter = (req, file, cb) => {
@@ -45,11 +43,8 @@ module.exports.uploadUserPhoto = upload.single('photo');
 module.exports.resizeUserPhoto = catchAsync(async (req, res, next) => {
 	if (!req.file) return next();
 
-	// image stored in memory will not have the filename property set
-	// hence set it, as it is used by uploadDetails to store the image reference in db
 	req.file.filename = `user-${req.user.id}-${Date.now()}.jpeg`;
 
-	// the image stored in memory is available at req.file.buffer
 	await sharp(req.file.buffer)
 		.resize(500, 500)
 		.toFormat('jpeg')

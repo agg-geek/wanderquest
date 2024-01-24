@@ -31,18 +31,10 @@ if (updateUserDetailsForm) {
 	updateUserDetailsForm.addEventListener('submit', evt => {
 		evt.preventDefault();
 
-		// for uploading images, you need to create a form
-		// of the type multipart/form-data, hence new FormData()
 		const form = new FormData();
 		form.append('name', document.querySelector('#name').value);
 		form.append('email', document.querySelector('#email').value);
-		// files[0] as we only need the first file
-		// notice that 'photo' here is the key for updateUserDetails to identify the image
 		form.append('photo', document.querySelector('#photo').files[0]);
-
-		// updateUserDetails() requires an obj to be sent which contains the data
-		// you can send the form itself as it is already in the correct format
-		// no changes need to be made to the updateUserDetails fn itself
 		updateUserDetails(form);
 	});
 }
