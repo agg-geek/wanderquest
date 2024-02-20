@@ -37,8 +37,6 @@ module.exports.resizeTourImages = catchAsync(async (req, res, next) => {
 		.toFile(`public/img/tours/${req.body.imageCover}`);
 
 	req.body.images = [];
-
-	req.body.images = [];
 	await Promise.all(
 		req.files.images.map(async (file, i) => {
 			const filename = `tour-${req.params.id}-${Date.now()}-${i + 1}.jpeg`;
@@ -52,8 +50,6 @@ module.exports.resizeTourImages = catchAsync(async (req, res, next) => {
 			req.body.images.push(filename);
 		})
 	);
-
-	await Promise.all(req.body.images);
 
 	next();
 });
