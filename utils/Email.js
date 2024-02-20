@@ -11,11 +11,6 @@ class Email {
 	}
 
 	_newTransport() {
-		if (process.env.NODE_ENV === 'production') {
-			// TODO: Sendgrid
-			return;
-		}
-
 		return nodemailer.createTransport({
 			host: process.env.EMAIL_HOST,
 			port: process.env.EMAIL_PORT,
@@ -46,7 +41,7 @@ class Email {
 	}
 
 	async sendWelcome() {
-		await this.send('welcome', 'Welcome to the Natours Family!');
+		await this.send('welcome', 'Welcome to the WanderQuest Family!');
 	}
 
 	async sendPasswordReset() {
