@@ -37,7 +37,9 @@ const CheckoutForm = () => {
 					setMessage('Your payment is processing.');
 					break;
 				case 'requires_payment_method':
-					setMessage('Your payment was not successful, please try again.');
+					setMessage(
+						'Your payment was not successful, please try again.'
+					);
 					break;
 				default:
 					setMessage('Something went wrong.');
@@ -46,7 +48,7 @@ const CheckoutForm = () => {
 		});
 	}, [stripe]);
 
-	const handleSubmit = async e => {
+	const handleSubmit = async (e) => {
 		e.preventDefault();
 
 		if (!stripe || !elements) {
@@ -58,7 +60,9 @@ const CheckoutForm = () => {
 		const { error } = await stripe.confirmPayment({
 			elements,
 			confirmParams: {
-				return_url: 'http://localhost:5173/payment-success',
+				return_url: `${
+					import.meta.env.VITE_FRONTEND_URL
+				}/payment-success`,
 			},
 		});
 
@@ -77,18 +81,25 @@ const CheckoutForm = () => {
 	};
 
 	return (
-		<form id="payment-form" onSubmit={handleSubmit}>
+		<form id='payment-form' onSubmit={handleSubmit}>
 			<LinkAuthenticationElement
-				id="link-authentication-element"
-				onChange={e => setEmail(e.target.value)}
+				id='link-authentication-element'
+				onChange={(e) => setEmail(e.target.value)}
 			/>
-			<PaymentElement id="payment-element" options={paymentElementOptions} />
-			<button disabled={isLoading || !stripe || !elements} id="submit">
-				<span id="button-text">
-					{isLoading ? <div className="spinner" id="spinner"></div> : 'Pay now'}
+			<PaymentElement
+				id='payment-element'
+				options={paymentElementOptions}
+			/>
+			<button disabled={isLoading || !stripe || !elements} id='submit'>
+				<span id='button-text'>
+					{isLoading ? (
+						<div className='spinner' id='spinner'></div>
+					) : (
+						'Pay now'
+					)}
 				</span>
 			</button>
-			{message && <div id="payment-message">{message}</div>}
+			{message && <div id='payment-message'>{message}</div>}
 		</form>
 	);
 };

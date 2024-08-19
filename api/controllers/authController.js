@@ -7,7 +7,7 @@ const catchAsync = require('./../utils/catchAsync');
 const AppError = require('./../utils/appError');
 // const Email = require('./../utils/Email');
 
-const signToken = id => {
+const signToken = (id) => {
 	return jwt.sign({ id }, process.env.JWT_SECRET, {
 		expiresIn: process.env.JWT_EXPIRE_TIME,
 	});
@@ -19,7 +19,9 @@ const sendToken = (res, statusCode, userId, userData) => {
 		// prettier-ignore
 		expires: new Date(Date.now() + process.env.JWT_COOKIE_EXPIRE_TIME * 24 * 60 * 60 * 1000),
 		httpOnly: true,
-		...(process.env.NODE_ENV === 'production' && { secure: true }),
+		secure: true,
+		sameSite: 'none',
+		// ...(process.env.NODE_ENV === 'production' && { secure: true }),
 	};
 	res.cookie('jwt', token, cookieOptions);
 
@@ -47,7 +49,11 @@ module.exports.signup = catchAsync(async (req, res, next) => {
 	const url = `${req.protocol}://${req.get('host')}/my-account`;
 	// await new Email(newUser, url).sendWelcome();
 
-	const userData = { name: newUser.name, email: newUser.email, photo: newUser.photo };
+	const userData = {
+		name: newUser.name,
+		email: newUser.email,
+		photo: newUser.photo,
+	};
 	sendToken(res, 201, newUser._id, { user: userData });
 });
 
@@ -96,7 +102,10 @@ module.exports.getLoggedInUser = async (req, res, next) => {
 	try {
 		const token = req.cookies.jwt;
 		if (!token) return null;
-		const payload = await promisify(jwt.verify)(token, process.env.JWT_SECRET);
+		const payload = await promisify(jwt.verify)(
+			token,
+			process.env.JWT_SECRET
+		);
 		const currentUser = await User.findById(payload.id);
 		if (!currentUser) return null;
 		if (currentUser.checkPasswordChange(payload.iat)) return null;
@@ -172,7 +181,8 @@ exports.updatePassword = catchAsync(async (req, res, next) => {
 	const user = await User.findById(req.user.id).select('+password');
 
 	const correctPwd = await user.checkPassword(user.password, currentPwd);
-	if (!correctPwd) return next(new AppError('Current password is incorrect', 401));
+	if (!correctPwd)
+		return next(new AppError('Current password is incorrect', 401));
 
 	user.password = newPwd;
 	user.passwordConfirm = newPwdConfirm;

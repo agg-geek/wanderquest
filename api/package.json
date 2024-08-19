@@ -2,10 +2,10 @@
 	"name": "wanderquest",
 	"version": "1.0.0",
 	"description": "",
-	"main": "app.js",
+	"main": "server.js",
 	"scripts": {
 		"start": "nodemon server.js",
-		"start:prod": "NODE_ENV=production nodemon server.js",
+		"start:prod": "node server.js",
 		"seed": "node seeds/seed.js",
 		"debug": "ndb server.js"
 	},
